@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/otaviof/hosts.svg?branch=master)](https://travis-ci.com/otaviof/hosts)
+
 # `hosts`
 
 Command line utility to generate your `/etc/hosts`, based in a combination files. It also
