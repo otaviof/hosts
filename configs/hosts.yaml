@@ -4,9 +4,13 @@ hosts:
 
 blacklist:
   url: https://someonewhocares.org/hosts/hosts
-  output: 99-someone-who-cares
+  output: 99-blocks.host
   mappings:
     - search: 127.0.0.1
       replace: 0.0.0.0
   skip:
-    - 0\.0\.0\.0\s.*?\s+.*?$
+    - ^0\.0\.0\.0\s.*?\s+.*?$
+    - ^$
+    - ^#.*?$
+    - ^.*?(local|localhost|broadcasthost|ip6).*?$
+    - ^\s+#.*?$
