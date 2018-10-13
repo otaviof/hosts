@@ -3,7 +3,7 @@ hosts:
   output: /var/tmp/etc_hosts
 
 external:
-  url: https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/thirdparties/hosts-file.net/ad_servers.txt
+  url: https://github.com/uBlockOrigin/uAssets/raw/master/thirdparties/www.malwaredomainlist.com/hostslist/hosts.txt
   output: 99-blocks.host
   mappings:
     - search: 127.0.0.1
