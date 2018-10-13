@@ -22,12 +22,13 @@ type Hosts struct {
 
 // Blacklist `blacklist` configuration block
 type Blacklist struct {
-	Output         string         `yaml:"output"`
-	AddressMapping AddressMapping `yaml:"addressMapping"`
+	Output   string     `yaml:"output"`
+	Mappings []Mappings `yaml:"mappings"`
+	Skip     []string   `yaml:"skip"`
 }
 
-// AddressMapping `addressMapping` block inside `blacklist`
-type AddressMapping struct {
+// Mappings `addressMapping` block inside `blacklist`
+type Mappings struct {
 	Search  string `yaml:"search"`
 	Replace string `yaml:"replace"`
 }

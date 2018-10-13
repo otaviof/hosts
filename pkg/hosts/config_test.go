@@ -2,6 +2,7 @@ package hosts
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"testing"
 
@@ -14,9 +15,13 @@ func TestConfigNewConfig(t *testing.T) {
 
 	config, err = NewConfig("../../configs/hosts.yaml")
 
+	log.Printf("Config: '%#v'", config)
+
 	assert.Nil(t, err)
 	assert.NotNil(t, config)
+
 	assert.Equal(t, config.Hosts.BaseDirectory, fmt.Sprintf("%s/.hosts", os.Getenv("HOME")))
+	assert.True(t, config.Hosts.Output != "")
 }
 
 func TestConfigValidate(t *testing.T) {
