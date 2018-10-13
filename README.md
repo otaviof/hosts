@@ -98,6 +98,7 @@ The following parameters are applicable to all sub-commands:
 
 - `--config`: alternative location of the configuration file;
 - `--dry-run`: do not apply changes;
+- `--help`: inline help message;
 
 To generate your hosts file, use `apply` command:
 
