@@ -79,10 +79,10 @@ For instance:
 It's a common use-case to map malicious or advertising related addresses in `/etc/hosts` to
 `0.0.0.0` or `127.0.0.1`, therefore you block any communication from your device to those endpoints.
 
-Online communities es like for instance [SomeOneWhoCares.org](https://someonewhocares.org) and
-[uBlock Assets](https://github.com/uBlockOrigin/uAssets), are providing a up-to-date
-[list of hosts](https://github.com/uBlockOrigin/uAssets/tree/master/thirdparties) that users can
-adopt, and it many cases you may need modifications, and may want to skip certain entries.
+Online communities like for instance [SomeOneWhoCares.org](https://someonewhocares.org) and
+[uBlock Assets](https://github.com/uBlockOrigin/uAssets), are providing a up-to-date list of
+[hosts](https://github.com/uBlockOrigin/uAssets/tree/master/thirdparties) that users can adopt,
+although, in many cases you may need modifications, and may want to skip certain entries as well.
 
 Therefore, `hosts` provide a way to load the external resource and apply `mappping`s and `skip`
 certain lines. Please consider [configuration](#configuration) section.
