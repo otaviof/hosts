@@ -1,0 +1,10 @@
+hosts:
+  baseDirectory: ~/.hosts
+  output: /var/tmp/etc_hosts
+
+blacklist:
+  url: https://someonewhocares.org/hosts/hosts
+  output: 99-someone-who-cares
+  adddressMappping:
+    search: 127.0.0.1
+    replace: 0.0.0.0
