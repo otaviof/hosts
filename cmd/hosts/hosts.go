@@ -36,7 +36,7 @@ func getConfig() *hosts.Config {
 		log.Fatalf("[ERROR] %s", err)
 	}
 
-	log.Printf("Validating configuraiton...")
+	log.Printf("Validating configuration...")
 	if err = config.Validate(); err != nil {
 		log.Fatalf("[ERROR] %s", err)
 	}
