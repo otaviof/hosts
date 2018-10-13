@@ -9,32 +9,36 @@ import (
 	"regexp"
 )
 
+// Parser for a '.host' files
 type Parser struct {
 	filePath    string
-	Contents    []string
 	ipv4Re      *regexp.Regexp
 	ipv6Re      *regexp.Regexp
 	ipv6AliasRe *regexp.Regexp
+	Contents    []string
 }
 
+// loadRegexp load the regular expressions that are used to identify addresses.
 func (p *Parser) loadRegexp() error {
+	var ipv6ReStr = `^([0-9a-f]|:){1,4}(:([0-9a-f]{0,4})*){1,7}`
 	var err error
 
 	if p.ipv4Re, err = regexp.Compile(`^(\d{1,3}\.){3}\d{1,3}`); err != nil {
 		return err
 	}
 
-	if p.ipv6Re, err = regexp.Compile(`^([0-9a-f]|:){1,4}(:([0-9a-f]{0,4})*){1,7}`); err != nil {
+	if p.ipv6Re, err = regexp.Compile(ipv6ReStr); err != nil {
 		return err
 	}
 
-	if p.ipv6AliasRe, err = regexp.Compile(`^([0-9a-f]|:){1,4}(:([0-9a-f]{0,4})*){1,7}(%\w+)`); err != nil {
+	if p.ipv6AliasRe, err = regexp.Compile(ipv6ReStr + `(%\w+)`); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// extract investigate line to extract ipv4 and ipv6 addresses.
 func (p *Parser) extract(line []byte) error {
 	var lineStr = string(line)
 
@@ -46,6 +50,7 @@ func (p *Parser) extract(line []byte) error {
 	return nil
 }
 
+// Ingest read host file and parse it's contents.
 func (p *Parser) Ingest() error {
 	var file *os.File
 	var reader *bufio.Reader
@@ -59,7 +64,6 @@ func (p *Parser) Ingest() error {
 	defer file.Close()
 
 	reader = bufio.NewReader(file)
-
 	for {
 		var line []byte
 
@@ -77,6 +81,7 @@ func (p *Parser) Ingest() error {
 	return nil
 }
 
+// NewParser creates a new instance of Parser, given a dot host file input.
 func NewParser(filePath string) (*Parser, error) {
 	var parser = &Parser{filePath: filePath}
 	var err error
