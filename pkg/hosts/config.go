@@ -22,13 +22,14 @@ type Hosts struct {
 
 // Blacklist `blacklist` configuration block
 type Blacklist struct {
-	Output   string     `yaml:"output"`
-	Mappings []Mappings `yaml:"mappings"`
-	Skip     []string   `yaml:"skip"`
+	URL      string    `yaml:"url"`
+	Output   string    `yaml:"output"`
+	Mappings []Mapping `yaml:"mappings"`
+	Skip     []string  `yaml:"skip"`
 }
 
-// Mappings `addressMapping` block inside `blacklist`
-type Mappings struct {
+// Mapping `mappings` block inside `blacklist`
+type Mapping struct {
 	Search  string `yaml:"search"`
 	Replace string `yaml:"replace"`
 }
@@ -37,6 +38,9 @@ type Mappings struct {
 func (c *Config) Validate() error {
 	if !isDir(c.Hosts.BaseDirectory) {
 		return fmt.Errorf("Can't find directory at: '%s'", c.Hosts.BaseDirectory)
+	}
+	if c.Hosts.Output == "" {
+		return fmt.Errorf("output is mandatory: '%s'", c.Hosts.Output)
 	}
 	return nil
 }
