@@ -10,8 +10,8 @@ import (
 
 // Config primary configuration file contents
 type Config struct {
-	Hosts     Hosts     `yaml:"hosts"`
-	Blacklist Blacklist `yaml:"blacklist"`
+	Hosts    Hosts    `yaml:"hosts"`
+	External External `yaml:"external"`
 }
 
 // Hosts `hosts` configuration block
@@ -20,8 +20,8 @@ type Hosts struct {
 	Output        string `yaml:"output"`
 }
 
-// Blacklist `blacklist` configuration block
-type Blacklist struct {
+// External `blacklist` configuration block
+type External struct {
 	URL      string    `yaml:"url"`
 	Output   string    `yaml:"output"`
 	Mappings []Mapping `yaml:"mappings"`

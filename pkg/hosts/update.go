@@ -27,8 +27,8 @@ func (u *Update) fetchBlacklist() error {
 	var resp *http.Response
 	var err error
 
-	log.Printf("Reading URL: '%s'", u.config.Blacklist.URL)
-	if resp, err = client.Get(u.config.Blacklist.URL); err != nil {
+	log.Printf("Reading URL: '%s'", u.config.External.URL)
+	if resp, err = client.Get(u.config.External.URL); err != nil {
 		return err
 	}
 	defer resp.Body.Close()
@@ -62,7 +62,7 @@ func (u *Update) mappings() error {
 			}
 			return err
 		}
-		for _, mapping = range u.config.Blacklist.Mappings {
+		for _, mapping = range u.config.External.Mappings {
 			lineStr = strings.Replace(string(line[:]), mapping.Search, mapping.Replace, 1)
 		}
 
@@ -116,7 +116,7 @@ func (u *Update) print() {
 
 // render write contents to output file.
 func (u *Update) render() error {
-	var filePath = path.Join(u.config.Hosts.BaseDirectory, u.config.Blacklist.Output)
+	var filePath = path.Join(u.config.Hosts.BaseDirectory, u.config.External.Output)
 	log.Printf("Saving blacklist at: '%s'", filePath)
 	return ioutil.WriteFile(filePath, u.content, 0600)
 }
@@ -146,12 +146,12 @@ func (u *Update) Execute() error {
 	return nil
 }
 
-// NewUpdate creates a new update instance, by initializing regexps.
+// NewUpdate creates a new update instance, by initializing .
 func NewUpdate(config *Config, dryRun bool) (*Update, error) {
 	var update = &Update{config: config, dryRun: dryRun}
 	var err error
 
-	for _, skipRe := range config.Blacklist.Skip {
+	for _, skipRe := range config.External.Skip {
 		var compiled *regexp.Regexp
 
 		if compiled, err = regexp.Compile(skipRe); err != nil {

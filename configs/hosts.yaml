@@ -2,7 +2,7 @@ hosts:
   baseDirectory: ~/.hosts
   output: /var/tmp/etc_hosts
 
-blacklist:
+external:
   url: https://someonewhocares.org/hosts/hosts
   output: 99-blocks.host
   mappings:
