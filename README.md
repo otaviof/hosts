@@ -4,8 +4,8 @@ Command line utility to generate your `/etc/hosts`, based in a combination files
 supports reading a external HTTP resource to populate local definitions, like block-lists for
 instance.
 
-The objective of `hosts` is to allow keeping individual project, or different context, hosts
-definitions into their own files, and also move this type of data back to user home folder.
+The objective of `hosts` is to allow keeping individual projects, or contexts, hosts definitions
+into their own files, and also move this type of data back to user home.
 
 ## Installing
 
@@ -15,7 +15,7 @@ The easiest way to install `hosts` is via `go get`:
 go get -u github.com/otaviof/hosts/cmd/hosts
 ```
 
-Alternatively, if you cloned the repository:
+Alternatively, when you cloning the repository:
 
 ``` bash
 make bootstrap
@@ -85,12 +85,12 @@ external resource and apply `mappping`s and `skip` certain lines. Please conside
 
 ## Usage
 
-This command-line utility will inspect `hosts.baseDirectory`, and the `.host` files found over
-there are employed to create a new `/etc/hosts` files, depending on your configuration.
+This command-line utility will inspect `hosts.baseDirectory`, and the `*.host` files found over
+there are combined to create a new `/etc/hosts` files, accordingly to configuration.
 
 The sequence of files in this directory is kept based on alpha-numeric ordering, therefore it's
-encouraged to name files starting with sequential numbers, like `00-first.host`, `10-second.host`
-and so forth.
+encouraged to name files starting with numbers, like `00-first.host`, `10-second.host` and so
+forth, since the sequence will be maintained.
 
 The following parameters are applicable to all sub-commands:
 
@@ -111,4 +111,3 @@ hosts update --dry-run
 
 When update external resources it will save date to configured file, and to take part of
 `/etc/hosts` file, you must use `apply` command again.
-
