@@ -36,22 +36,23 @@ hosts:
   # final output file
   output: /etc/hosts
 
+# external resources
 external:
   # read "body" from external URL
-  url: https://someonewhocares.org/hosts/hosts
-  # file name to save contents, under `hosts.baseDirectory`
-  output: 99-blocks.host
-  # search and replace values
-  mappings:
-    # search for
-    - search: 127.0.0.1
-      # replace by
-      replace: 0.0.0.0
-  # skip lines from returned body, based in a list of regular expressions
-  skip:
-    - ^#.*?$
-    - ^\s+#.*?$
-    - ^.*?(local|localhost|broadcasthost|ip6).*?$
+  - url: https://someonewhocares.org/hosts/hosts
+    # file name to save contents, under `hosts.baseDirectory`
+    output: 99-blocks.host
+    # search and replace values
+    mappings:
+      # search for
+      - search: 127.0.0.1
+        # replace with
+        replace: 0.0.0.0
+    # skip lines from returned body, based in a list of regular expressions
+    skip:
+      - ^#.*?$
+      - ^\s+#.*?$
+      - ^.*?(local|localhost|broadcasthost|ip6).*?$
 ```
 
 The default place for this configuration is `/usr/local/etc/hosts.yaml`, or alternatively you
