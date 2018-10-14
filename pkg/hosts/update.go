@@ -19,7 +19,7 @@ type Update struct {
 	dryRun bool
 }
 
-// readExternalURL executes the GET request to read blacklist URL body.
+// readExternalURL execute a GET request to read external resource URL body.
 func (u *Update) readExternalURL(URL string) ([]byte, error) {
 	var client http.Client
 	var resp *http.Response
@@ -104,11 +104,11 @@ func (u *Update) skip(content []byte, res []*regexp.Regexp) ([]byte, error) {
 // render write contents to output file.
 func (u *Update) render(content []byte, name string) error {
 	var filePath = path.Join(u.config.Hosts.BaseDirectory, name)
-	log.Printf("Saving blacklist at: '%s'", filePath)
+	log.Printf("Saving external resource data at: '%s'", filePath)
 	return ioutil.WriteFile(filePath, content, 0644)
 }
 
-// Execute actions to read blacklist upstream and save/print contents.
+// Execute actions to read upstream resources and save/print contents.
 func (u *Update) Execute() error {
 	var external External
 	var err error
@@ -116,28 +116,32 @@ func (u *Update) Execute() error {
 	for _, external = range u.config.External {
 		var content []byte
 		var skipREs []*regexp.Regexp
+		var compiled *regexp.Regexp
 
+		// reading external data
 		if content, err = u.readExternalURL(external.URL); err != nil {
 			return err
 		}
 
+		// applying the initial search and replace, using strings
 		if content, err = u.mappingSearchAndReplace(content, external.Mappings); err != nil {
 			return err
 		}
 
+		// compiling regular expressions to be used in `skip` method
 		for _, re := range external.Skip {
-			var compiled *regexp.Regexp
-
 			if compiled, err = regexp.Compile(re); err != nil {
 				return err
 			}
 			skipREs = append(skipREs, compiled)
 		}
 
+		// skipping lines using regular expresions
 		if content, err = u.skip(content, skipREs); err != nil {
 			return err
 		}
 
+		// saving or printing contens
 		if u.dryRun {
 			fmt.Printf("%s", string(content))
 		} else {

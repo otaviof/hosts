@@ -20,7 +20,7 @@ type Hosts struct {
 	Output        string `yaml:"output"`
 }
 
-// External `blacklist` configuration block
+// External `external` configuration block
 type External struct {
 	URL      string    `yaml:"url"`
 	Output   string    `yaml:"output"`
@@ -28,7 +28,7 @@ type External struct {
 	Skip     []string  `yaml:"skip"`
 }
 
-// Mapping `mappings` block inside `blacklist`
+// Mapping `mappings` block inside a `external` entry
 type Mapping struct {
 	Search  string `yaml:"search"`
 	Replace string `yaml:"replace"`
