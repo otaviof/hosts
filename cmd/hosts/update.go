@@ -28,12 +28,8 @@ func init() {
 
 func runUpdateCmd(cmd *cobra.Command, args []string) {
 	var config = getConfig()
-	var update *hosts.Update
+	var update = hosts.NewUpdate(config, dryRun)
 	var err error
-
-	if update, err = hosts.NewUpdate(config, dryRun); err != nil {
-		log.Fatalf("[ERROR] %s", err)
-	}
 
 	if err = update.Execute(); err != nil {
 		log.Fatalf("[ERROR] %s", err)
