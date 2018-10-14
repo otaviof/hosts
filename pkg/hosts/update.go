@@ -13,12 +13,10 @@ import (
 	"strings"
 )
 
-// Update read external blacklist contents, and update configured output file.
+// Update read external resource contents, and update configured output files.
 type Update struct {
-	config  *Config
-	dryRun  bool
-	content []byte
-	skipRes []*regexp.Regexp
+	config *Config
+	dryRun bool
 }
 
 // readExternalURL executes the GET request to read blacklist URL body.
@@ -40,7 +38,7 @@ func (u *Update) readExternalURL(URL string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-// mappings search and replace contents.
+// mappingSearchAndReplace search and replace contents.
 func (u *Update) mappingSearchAndReplace(content []byte, mappings []Mapping) ([]byte, error) {
 	var mapped []byte
 	var reader = bufio.NewReader(bytes.NewReader(content))
