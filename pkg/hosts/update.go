@@ -21,33 +21,29 @@ type Update struct {
 	skipRes []*regexp.Regexp
 }
 
-// fetchBlacklist executes the GET request to read blacklist URL body.
-func (u *Update) fetchBlacklist() error {
+// readExternalURL executes the GET request to read blacklist URL body.
+func (u *Update) readExternalURL(URL string) ([]byte, error) {
 	var client http.Client
 	var resp *http.Response
 	var err error
 
-	log.Printf("Reading URL: '%s'", u.config.External.URL)
-	if resp, err = client.Get(u.config.External.URL); err != nil {
-		return err
+	log.Printf("External resoure URL: '%s'", URL)
+	if resp, err = client.Get(URL); err != nil {
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("status-code is not okay: '%d'", resp.StatusCode)
+		return nil, fmt.Errorf("status-code is not okay: '%d'", resp.StatusCode)
 	}
 
-	if u.content, err = ioutil.ReadAll(resp.Body); err != nil {
-		return err
-	}
-
-	return nil
+	return ioutil.ReadAll(resp.Body)
 }
 
 // mappings search and replace contents.
-func (u *Update) mappings() error {
+func (u *Update) mappingSearchAndReplace(content []byte, mappings []Mapping) ([]byte, error) {
 	var mapped []byte
-	var reader = bufio.NewReader(bytes.NewReader(u.content))
+	var reader = bufio.NewReader(bytes.NewReader(content))
 	var err error
 
 	log.Printf("Replacing output accordingly with 'mapping'...")
@@ -60,22 +56,21 @@ func (u *Update) mappings() error {
 			if err == io.EOF {
 				break
 			}
-			return err
+			return nil, err
 		}
-		for _, mapping = range u.config.External.Mappings {
+		for _, mapping = range mappings {
 			lineStr = strings.Replace(string(line[:]), mapping.Search, mapping.Replace, 1)
 		}
 
 		mapped = append(mapped, []byte(fmt.Sprintf("%s\n", lineStr))...)
 	}
 
-	u.content = mapped
-	return nil
+	return mapped, nil
 }
 
 // skip lines that are matching one of the configured regular expressions.
-func (u *Update) skip() error {
-	var reader = bufio.NewReader(bytes.NewReader(u.content))
+func (u *Update) skip(content []byte, res []*regexp.Regexp) ([]byte, error) {
+	var reader = bufio.NewReader(bytes.NewReader(content))
 	var kept []byte
 	var err error
 
@@ -88,10 +83,10 @@ func (u *Update) skip() error {
 			if err == io.EOF {
 				break
 			}
-			return err
+			return nil, err
 		}
 
-		for _, re := range u.skipRes {
+		for _, re := range res {
 			if re.Match(line) {
 				skipLine = true
 				log.Printf("[SKIP] regexp='%s', line='%s'", re, line)
@@ -105,41 +100,52 @@ func (u *Update) skip() error {
 		}
 	}
 
-	u.content = kept
-	return nil
-}
-
-// print out body contents, after mapping and skipping.
-func (u *Update) print() {
-	fmt.Printf("%s", string(u.content))
+	return kept, nil
 }
 
 // render write contents to output file.
-func (u *Update) render() error {
-	var filePath = path.Join(u.config.Hosts.BaseDirectory, u.config.External.Output)
+func (u *Update) render(content []byte, name string) error {
+	var filePath = path.Join(u.config.Hosts.BaseDirectory, name)
 	log.Printf("Saving blacklist at: '%s'", filePath)
-	return ioutil.WriteFile(filePath, u.content, 0600)
+	return ioutil.WriteFile(filePath, content, 0644)
 }
 
 // Execute actions to read blacklist upstream and save/print contents.
 func (u *Update) Execute() error {
+	var external External
 	var err error
 
-	if err = u.fetchBlacklist(); err != nil {
-		return err
-	}
-	if err = u.mappings(); err != nil {
-		return err
-	}
-	if err = u.skip(); err != nil {
-		return err
-	}
+	for _, external = range u.config.External {
+		var content []byte
+		var skipREs []*regexp.Regexp
 
-	if u.dryRun {
-		u.print()
-	} else {
-		if err = u.render(); err != nil {
+		if content, err = u.readExternalURL(external.URL); err != nil {
 			return err
+		}
+
+		if content, err = u.mappingSearchAndReplace(content, external.Mappings); err != nil {
+			return err
+		}
+
+		for _, re := range external.Skip {
+			var compiled *regexp.Regexp
+
+			if compiled, err = regexp.Compile(re); err != nil {
+				return err
+			}
+			skipREs = append(skipREs, compiled)
+		}
+
+		if content, err = u.skip(content, skipREs); err != nil {
+			return err
+		}
+
+		if u.dryRun {
+			fmt.Printf("%s", string(content))
+		} else {
+			if err = u.render(content, external.Output); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -147,19 +153,6 @@ func (u *Update) Execute() error {
 }
 
 // NewUpdate creates a new update instance, by initializing .
-func NewUpdate(config *Config, dryRun bool) (*Update, error) {
-	var update = &Update{config: config, dryRun: dryRun}
-	var err error
-
-	for _, skipRe := range config.External.Skip {
-		var compiled *regexp.Regexp
-
-		if compiled, err = regexp.Compile(skipRe); err != nil {
-			return nil, err
-		}
-		update.skipRes = append(update.skipRes, compiled)
-	}
-	log.Printf("%s", update.content)
-
-	return update, nil
+func NewUpdate(config *Config, dryRun bool) *Update {
+	return &Update{config: config, dryRun: dryRun}
 }

@@ -10,12 +10,10 @@ var update *Update
 
 func TestUpdateNewUpdate(t *testing.T) {
 	var config *Config
-	var err error
 
 	config, _ = NewConfig("../../configs/hosts.yaml")
-	update, err = NewUpdate(config, true)
+	update = NewUpdate(config, true)
 
-	assert.Nil(t, err)
 	assert.NotNil(t, update)
 }
 
