@@ -10,8 +10,8 @@ import (
 
 // Config primary configuration file contents
 type Config struct {
-	Hosts    Hosts    `yaml:"hosts"`
-	External External `yaml:"external"`
+	Hosts    Hosts      `yaml:"hosts"`
+	External []External `yaml:"external"`
 }
 
 // Hosts `hosts` configuration block
