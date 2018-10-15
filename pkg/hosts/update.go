@@ -113,7 +113,6 @@ func (u *Update) Execute() error {
 	var err error
 
 	for _, external = range u.config.External {
-		// reading external data
 		if u.content, err = u.readExternalURL(external.URL); err != nil {
 			return err
 		}
@@ -122,7 +121,7 @@ func (u *Update) Execute() error {
 			return err
 		}
 
-		// saving or printing contens
+		// saving or printing content
 		if u.dryRun {
 			fmt.Printf("%s", string(u.content))
 		} else {
@@ -135,7 +134,7 @@ func (u *Update) Execute() error {
 	return nil
 }
 
-// NewUpdate creates a new update instance, by initializing .
+// NewUpdate creates a new update instance, by initializing.
 func NewUpdate(config *Config, dryRun bool) *Update {
 	return &Update{config: config, dryRun: dryRun}
 }
