@@ -73,6 +73,9 @@ func (p *Parser) Ingest() error {
 			}
 			return err
 		}
+		if len(line) == 0 {
+			continue
+		}
 		if err = p.extract(line); err != nil {
 			log.Printf("[WARN] %s", err)
 		}
