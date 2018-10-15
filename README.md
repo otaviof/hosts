@@ -42,17 +42,20 @@ external:
   - url: https://someonewhocares.org/hosts/hosts
     # file name to save contents, under `hosts.baseDirectory`
     output: 99-blocks.host
-    # search and replace values
-    mappings:
-      # search for
+    # tranform downloaded contents line-by-line
+    tranform:
+      # search using a regular expression
       - search: 127.0.0.1
         # replace with
         replace: 0.0.0.0
-    # skip lines from returned body, based in a list of regular expressions
-    skip:
-      - ^#.*?$
-      - ^\s+#.*?$
-      - ^.*?(local|localhost|broadcasthost|ip6).*?$
+      # regular expression using a match group
+      - search: (\w+.*?)#.*?$
+        # replacing with match group
+        replace: $1
+      # when `replace` is empty, the line is skipped
+      - search: ^#.*?$
+      # skipping localhost related entries
+      - search: ^.*?(local|localhost|broadcasthost|ip6).*?$
 ```
 
 The default place for this configuration is `/usr/local/etc/hosts.yaml`, or alternatively you
@@ -85,8 +88,9 @@ Online communities like for instance [SomeOneWhoCares.org](https://someonewhocar
 [hosts](https://github.com/uBlockOrigin/uAssets/tree/master/thirdparties) that users can adopt,
 although, in many cases you may need modifications, and may want to skip certain entries as well.
 
-Therefore, `hosts` provide a way to load the external resource and apply `mappping`s and `skip`
-certain lines. Please consider [configuration](#configuration) section.
+Therefore, `hosts` provide a way to load the external resource and apply regular expression based
+transformation, which can replace contents, or skip lines. Please consider
+[configuration](#configuration) section.
 
 ## Usage
 

@@ -13,12 +13,11 @@ var updateCmd = &cobra.Command{
 	Short: "Update host entries from 'external' resource.",
 	Long: `
 Update will execute a GET request agains configured 'external.URL', and read returned body line by
-line to extract host entries. Those entires can be use 'mapping's, in order to search and replace
-string. You can also configure 'skip', which corresponds to a list of regular-expressions for lines
-to skip from payload to be stored.
+line, those lines will be transformed accordingly with 'external[n].transform' block, where lines
+can be subject to search-and-replace, or skipped, before data is stored.
 
 After 'update' command you also need to execute 'apply' command to consist those changes in the
-final '/etc/hosts' file.`,
+final '/etc/hosts' file, or other configured location.`,
 	Run: runUpdateCmd,
 }
 
