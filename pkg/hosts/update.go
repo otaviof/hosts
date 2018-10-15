@@ -15,8 +15,9 @@ import (
 
 // Update read external resource contents, and update configured output files.
 type Update struct {
-	config *Config
-	dryRun bool
+	config  *Config
+	content []byte
+	dryRun  bool
 }
 
 // readExternalURL execute a GET request to read external resource URL body.
@@ -118,17 +119,16 @@ func (u *Update) Execute() error {
 	var err error
 
 	for _, external = range u.config.External {
-		var content []byte
 		var skipREs []*regexp.Regexp
 		var compiled *regexp.Regexp
 
 		// reading external data
-		if content, err = u.readExternalURL(external.URL); err != nil {
+		if u.content, err = u.readExternalURL(external.URL); err != nil {
 			return err
 		}
 
 		// applying the initial search and replace, using strings
-		if content, err = u.mappingSearchAndReplace(content, external.Mappings); err != nil {
+		if u.content, err = u.mappingSearchAndReplace(u.content, external.Mappings); err != nil {
 			return err
 		}
 
@@ -141,15 +141,15 @@ func (u *Update) Execute() error {
 		}
 
 		// skipping lines using regular expresions
-		if content, err = u.skip(content, skipREs); err != nil {
+		if u.content, err = u.skip(u.content, skipREs); err != nil {
 			return err
 		}
 
 		// saving or printing contens
 		if u.dryRun {
-			fmt.Printf("%s", string(content))
+			fmt.Printf("%s", string(u.content))
 		} else {
-			if err = u.render(content, external.Output); err != nil {
+			if err = u.render(u.content, external.Output); err != nil {
 				return err
 			}
 		}
