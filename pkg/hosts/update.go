@@ -56,11 +56,15 @@ func (u *Update) mappingSearchAndReplace(content []byte, mappings []Mapping) ([]
 			}
 			return nil, err
 		}
+
+		// applying the search and replace per line
 		for _, mapping = range mappings {
 			lineStr = strings.Replace(string(line[:]), mapping.Search, mapping.Replace, 1)
+			line = []byte(lineStr)
 		}
 
-		mapped = append(mapped, []byte(fmt.Sprintf("%s\n", lineStr))...)
+		mapped = append(mapped, line...)
+		mapped = append(mapped, []byte("\n")...)
 	}
 
 	return mapped, nil
