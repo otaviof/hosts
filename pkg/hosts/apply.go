@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // Apply constructs a new '/etc/hosts' file.
@@ -17,6 +18,7 @@ type Apply struct {
 
 // print shows 'etcHosts' contents in stdout.
 func (a *Apply) print() {
+	log.Printf("[DRY-RUN] Hosts file contents:")
 	for _, line := range a.etcHosts {
 		fmt.Printf("%s\n", line)
 	}
@@ -44,7 +46,7 @@ func (a *Apply) Execute() error {
 	var parser *Parser
 	var err error
 
-	log.Printf("Files: '%#v'", a.files)
+	log.Printf("Host files to inspect: '[%s]'", strings.Join(a.files, ", "))
 
 	for _, file = range a.files {
 		var line string
@@ -56,8 +58,14 @@ func (a *Apply) Execute() error {
 			return err
 		}
 
+		// header line to identify origin file
 		a.etcHosts = append(a.etcHosts, fmt.Sprintf("### %s", file))
+		// appending lines into the final array
 		for _, line = range parser.Contents {
+			if stringSliceContains(a.etcHosts, line) {
+				log.Printf("[SKIP] Duplicated line '%s'", line)
+				continue
+			}
 			a.etcHosts = append(a.etcHosts, line)
 		}
 	}
@@ -91,7 +99,6 @@ func NewApply(config *Config, dryRun bool) (*Apply, error) {
 	var err error
 
 	log.Printf("Inspecting base-directory: '%s'", config.Hosts.BaseDirectory)
-
 	if apply.files, err = dirGlob(config.Hosts.BaseDirectory); err != nil {
 		return nil, err
 	}
