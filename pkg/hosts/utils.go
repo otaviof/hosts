@@ -37,3 +37,16 @@ func exists(path string) bool {
 	}
 	return true
 }
+
+// stringSliceContains checks if a slice contiains a string.
+func stringSliceContains(slice []string, str string) bool {
+	var sliceStr string
+
+	for _, sliceStr = range slice {
+		if str == sliceStr {
+			return true
+		}
+	}
+
+	return false
+}
