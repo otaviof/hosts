@@ -5,12 +5,10 @@ hosts:
 external:
   - url: https://github.com/uBlockOrigin/uAssets/raw/master/thirdparties/www.malwaredomainlist.com/hostslist/hosts.txt
     output: 99-blocks.host
-    mappings:
+    transform:
       - search: 127.0.0.1
         replace: 0.0.0.0
-    skip:
-      - ^0\.0\.0\.0\s.*?\s+.*?$
-      - ^$
-      - ^#.*?$
-      - ^.*?(local|localhost|broadcasthost|ip6).*?$
-      - ^\s+#.*?$
+      - search: ^$
+      - search: ^#.*?$
+      - search: ^.*?(local|localhost|broadcasthost|ip6).*?$
+      - search: ^\s+#.*?$

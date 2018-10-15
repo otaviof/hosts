@@ -22,14 +22,13 @@ type Hosts struct {
 
 // External `external` configuration block
 type External struct {
-	URL      string    `yaml:"url"`
-	Output   string    `yaml:"output"`
-	Mappings []Mapping `yaml:"mappings"`
-	Skip     []string  `yaml:"skip"`
+	URL       string      `yaml:"url"`
+	Output    string      `yaml:"output"`
+	Transform []Transform `yaml:"transform"`
 }
 
-// Mapping `mappings` block inside a `external` entry
-type Mapping struct {
+// Transform search/replace based in regular expressions
+type Transform struct {
 	Search  string `yaml:"search"`
 	Replace string `yaml:"replace"`
 }
