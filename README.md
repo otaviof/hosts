@@ -42,8 +42,8 @@ external:
   - url: https://someonewhocares.org/hosts/hosts
     # file name to save contents, under `hosts.baseDirectory`
     output: 99-blocks.host
-    # tranform downloaded contents line-by-line
-    tranform:
+    # transform downloaded contents line-by-line
+    transform:
       # search using a regular expression
       - search: 127.0.0.1
         # replace with
