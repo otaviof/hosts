@@ -13,6 +13,7 @@ import (
 
 var config *Config
 var update *Update
+var reSearchReplace map[*regexp.Regexp]string
 
 func TestUpdateNewUpdate(t *testing.T) {
 	config, _ = NewConfig("../../configs/hosts.yaml")
@@ -27,16 +28,26 @@ func TestUpdateExecute(t *testing.T) {
 	err = update.Execute()
 
 	assert.Nil(t, err)
+	assert.True(t, len(update.content) > 0)
 }
 
-func TestUpdateMapping(t *testing.T) {
+func TestUpdateReCompile(t *testing.T) {
+	var err error
+
+	reSearchReplace, err = update.reCompile(config.External[0].Transform)
+
+	assert.Nil(t, err)
+}
+
+func TestUpdateTransform(t *testing.T) {
 	var reader = bufio.NewReader(bytes.NewReader(update.content))
 	var line []byte
-	var lineStr string
-	var mapping Mapping
 	var err error
 
 	for {
+		var search *regexp.Regexp
+		var replace string
+
 		if line, _, err = reader.ReadLine(); err != nil {
 			if err == io.EOF {
 				break
@@ -44,35 +55,11 @@ func TestUpdateMapping(t *testing.T) {
 			log.Fatal(err)
 		}
 
-		lineStr = string(line[:])
-		for _, mapping = range config.External[0].Mappings {
-			assert.NotSubset(t, mapping.Search, lineStr)
-			assert.Subset(t, mapping.Replace, lineStr)
-		}
-	}
-}
-
-func TestUpdateSkip(t *testing.T) {
-	var reader = bufio.NewReader(bytes.NewReader(update.content))
-	var skipREs []*regexp.Regexp
-	var line []byte
-	var err error
-
-	for _, re := range config.External[0].Skip {
-		compiled, _ := regexp.Compile(re)
-		skipREs = append(skipREs, compiled)
-	}
-
-	for {
-		if line, _, err = reader.ReadLine(); err != nil {
-			if err == io.EOF {
-				break
+		for search, replace = range reSearchReplace {
+			// means the matching line should have been skipped
+			if replace == "" {
+				assert.False(t, search.Match(line))
 			}
-			log.Fatal(err)
-		}
-
-		for _, re := range skipREs {
-			assert.False(t, re.Match(line))
 		}
 	}
 }

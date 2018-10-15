@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"path"
 	"regexp"
-	"strings"
 )
 
 // Update read external resource contents, and update configured output files.
@@ -39,78 +38,73 @@ func (u *Update) readExternalURL(URL string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-// mappingSearchAndReplace search and replace contents.
-func (u *Update) mappingSearchAndReplace(content []byte, mappings []Mapping) ([]byte, error) {
-	var mapped []byte
-	var reader = bufio.NewReader(bytes.NewReader(content))
-	var err error
-
-	log.Printf("Replacing output accordingly with 'mapping'...")
-	for {
-		var line []byte
-		var lineStr string
-		var mapping Mapping
-
-		if line, _, err = reader.ReadLine(); err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-
-		// applying the search and replace per line
-		for _, mapping = range mappings {
-			lineStr = strings.Replace(string(line[:]), mapping.Search, mapping.Replace, 1)
-			line = []byte(lineStr)
-		}
-
-		mapped = append(mapped, line...)
-		mapped = append(mapped, []byte("\n")...)
-	}
-
-	return mapped, nil
-}
-
-// skip lines that are matching one of the configured regular expressions.
-func (u *Update) skip(content []byte, res []*regexp.Regexp) ([]byte, error) {
-	var reader = bufio.NewReader(bytes.NewReader(content))
-	var kept []byte
-	var err error
-
-	log.Printf("Skipping output matching 'skip'...")
-	for {
-		var line []byte
-		var skipLine = false
-
-		if line, _, err = reader.ReadLine(); err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-
-		for _, re := range res {
-			if re.Match(line) {
-				skipLine = true
-				log.Printf("[SKIP] regexp='%s', line='%s'", re, line)
-				break
-			}
-		}
-
-		if !skipLine {
-			kept = append(kept, line...)
-			kept = append(kept, []byte("\n")...)
-		}
-	}
-
-	return kept, nil
-}
-
 // render write contents to output file.
 func (u *Update) render(content []byte, name string) error {
 	var filePath = path.Join(u.config.Hosts.BaseDirectory, name)
 	log.Printf("Saving external resource data at: '%s'", filePath)
 	return ioutil.WriteFile(filePath, content, 0644)
+}
+
+// reCompile compile the regular expressions in `transform` block.
+func (u *Update) reCompile(t []Transform) (map[*regexp.Regexp]string, error) {
+	var reSearchReplace = make(map[*regexp.Regexp]string)
+	var searchReplace Transform
+	var compiled *regexp.Regexp
+	var err error
+
+	for _, searchReplace = range t {
+		if compiled, err = regexp.Compile(searchReplace.Search); err != nil {
+			return nil, err
+		}
+		reSearchReplace[compiled] = searchReplace.Replace
+	}
+
+	return reSearchReplace, nil
+}
+
+// transform content to either skip a line, or repliace contents based in regular expressions.
+func (u *Update) transform(content []byte, t []Transform) ([]byte, error) {
+	var reSearchReplace map[*regexp.Regexp]string
+	var reader = bufio.NewReader(bytes.NewReader(content))
+	var transformed []byte
+	var err error
+
+	if reSearchReplace, err = u.reCompile(t); err != nil {
+		return nil, err
+	}
+
+	for {
+		var line []byte
+		var search *regexp.Regexp
+		var replace string
+		var skip = false
+
+		if line, _, err = reader.ReadLine(); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+
+		for search, replace = range reSearchReplace {
+			if search.Match(line) {
+				// replace is empty, therefore we are skipping this line
+				if replace == "" {
+					skip = true
+					break
+				}
+				// replacing content entries
+				line = search.ReplaceAll(line, []byte(replace))
+			}
+		}
+
+		if !skip {
+			transformed = append(transformed, line...)
+			transformed = append(transformed, []byte("\n")...)
+		}
+	}
+
+	return transformed, nil
 }
 
 // Execute actions to read upstream resources and save/print contents.
@@ -119,29 +113,12 @@ func (u *Update) Execute() error {
 	var err error
 
 	for _, external = range u.config.External {
-		var skipREs []*regexp.Regexp
-		var compiled *regexp.Regexp
-
 		// reading external data
 		if u.content, err = u.readExternalURL(external.URL); err != nil {
 			return err
 		}
 
-		// applying the initial search and replace, using strings
-		if u.content, err = u.mappingSearchAndReplace(u.content, external.Mappings); err != nil {
-			return err
-		}
-
-		// compiling regular expressions to be used in `skip` method
-		for _, re := range external.Skip {
-			if compiled, err = regexp.Compile(re); err != nil {
-				return err
-			}
-			skipREs = append(skipREs, compiled)
-		}
-
-		// skipping lines using regular expresions
-		if u.content, err = u.skip(u.content, skipREs); err != nil {
+		if u.content, err = u.transform(u.content, external.Transform); err != nil {
 			return err
 		}
 
