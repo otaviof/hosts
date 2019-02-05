@@ -2,9 +2,8 @@
 
 # `hosts`
 
-Command line utility to generate your `/etc/hosts`, based in a combination files. It also
-supports reading a external HTTP resource to populate local definitions, like block-lists for
-instance.
+Command line utility to generate your `/etc/hosts`, based in a combination files. It also supports
+reading an external HTTP resource to populate local definitions, like block-lists for instance.
 
 The objective of `hosts` is to allow keeping individual projects, or contexts, hosts definitions
 into their own files, and also move this type of data back to user home.
@@ -17,11 +16,14 @@ The easiest way to install `hosts` is via `go get`:
 go get -u github.com/otaviof/hosts/cmd/hosts
 ```
 
-Alternatively, when you cloning the repository:
+Alternatively, when cloning this repository, execute:
 
 ``` bash
+# populate vendor
 make bootstrap
+# build project
 make
+# copy to bin directory
 make install
 ```
 
@@ -58,10 +60,10 @@ external:
       - search: ^.*?(local|localhost|broadcasthost|ip6).*?$
 ```
 
-The default place for this configuration is `/usr/local/etc/hosts.yaml`, or alternatively you
-maybe use `--config` to inform a different location, in command-line.
+The default location the configuration file is at `/usr/local/etc/hosts.yaml`, or alternatively
+you can employ `--config` parameter to inform a different location.
 
-To initialize your configuration, use:
+To start, copy the example configuration:
 
 ``` bash
 cp -v configs/hosts.yaml /usr/local/etc/
@@ -70,7 +72,9 @@ cp -v configs/hosts.yaml /usr/local/etc/
 ### Host Files
 
 This application will look for `.host` files in the `hosts.baseDirectory` location. You can find
-example of those files in `example/hosts-dir`, the formatting is the same than `/etc/hosts` file.
+example of those files in
+[`test/hosts-dir`](https://github.com/otaviof/hosts/tree/master/test/hosts-dir), the formatting is
+the same than `/etc/hosts` file.
 
 For instance:
 
@@ -85,11 +89,11 @@ It's a common use-case to map malicious or advertising related addresses in `/et
 
 Online communities like for instance [SomeOneWhoCares.org](https://someonewhocares.org) and
 [uBlock Assets](https://github.com/uBlockOrigin/uAssets), are providing a up-to-date list of
-[hosts](https://github.com/uBlockOrigin/uAssets/tree/master/thirdparties) that users can adopt,
+[hosts](https://github.com/uBlockOrigin/uAssets/tree/master/thirdparties) which users can adopt,
 although, in many cases you may need modifications, and may want to skip certain entries as well.
 
 Therefore, `hosts` provide a way to load the external resource and apply regular expression based
-transformation, which can replace contents, or skip lines. Please consider
+transformation, which can modify contents and skip certain lines. Please consider
 [configuration](#configuration) section.
 
 ## Usage
@@ -98,8 +102,7 @@ This command-line utility will inspect `hosts.baseDirectory`, and the `*.host` f
 there are combined to create a new `/etc/hosts` files, accordingly to configuration.
 
 The sequence of files in this directory is kept based on alpha-numeric ordering, therefore it's
-encouraged to name files starting with numbers, like `00-first.host`, `10-second.host` and so
-forth, since the sequence will be maintained.
+encouraged to name files starting with numbers, like `00-first.host`, `10-second.host` and so forth.
 
 The following parameters are applicable to all sub-commands:
 
@@ -119,5 +122,4 @@ And to read from `external` resource, use:
 hosts update --dry-run
 ```
 
-When update external resources it will save date to configured file, and to take part of
-`/etc/hosts` file, you must use `apply` command again.
+Rinse and repeat.
