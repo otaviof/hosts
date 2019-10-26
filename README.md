@@ -1,4 +1,14 @@
-[![Build Status](https://travis-ci.com/otaviof/hosts.svg?branch=master)](https://travis-ci.com/otaviof/hosts)
+<p align="center">
+    <a alt="GoReport" href="https://goreportcard.com/report/github.com/otaviof/hosts">
+        <img alt="GoReport" src="https://goreportcard.com/badge/github.com/otaviof/hosts">
+    </a>
+    <a href="https://godoc.org/github.com/otaviof/hosts/pkg/hosts">
+        <img alt="GoDoc Reference" src="https://godoc.org/github.com/otaviof/hosts/pkg/hosts?status.svg">
+    </a>
+    <a alt="CI Status" href="https://travis-ci.com/otaviof/hosts">
+        <img alt="CI Status" src="https://travis-ci.com/otaviof/hosts.svg?branch=master">
+    </a>
+</p>
 
 # `hosts`
 
