@@ -56,7 +56,7 @@ func (p *Parser) Ingest() error {
 	var reader *bufio.Reader
 	var err error
 
-	log.Printf("Inpecting host file: '%s'", p.filePath)
+	log.Printf("Inspecting host file: '%s'", p.filePath)
 
 	if file, err = os.Open(p.filePath); err != nil {
 		return err
