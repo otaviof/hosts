@@ -1,24 +1,21 @@
-APP = hosts
-BUILD_DIR ?= build
-
-.PHONY: default bootstrap build clean test
+APP ?= hosts
+GO_COMMON_FLAGS ?= -v -mod=vendor
+OUTPUT_DIR ?= build
+TEST_TIMEOUT ?= 1m
 
 default: build
 
-bootstrap:
-	go mod vendor
+vendor:
+	go mod vendor -v
 
-build: clean
-	GO111MODULE=on go build -mod=vendor -v -o $(BUILD_DIR)/$(APP) cmd/$(APP)/*
+build: vendor
+	@mkdir $(OUTPUT_DIR) > /dev/null 2>&1 || true
+	go build $(GO_COMMON_FLAGS) -o $(OUTPUT_DIR)/$(APP) cmd/$(APP)/*
 
-clean:
-	rm -rf $(BUILD_DIR) > /dev/null
+install: build
+	go install $(GO_COMMON_FLAGS) cmd/$(APP)/*
 
-clean-vendor:
-	rm -rf ./vendor > /dev/null
+test: test-unit
 
-test:
-	go test -cover -v pkg/$(APP)/*
-
-install:
-	GO111MODULE=on go install ./cmd/$(APP)
+test-unit:
+	go test $(GO_COMMON_FLAGS) -timeout=$(TEST_TIMEOUT) ./...
