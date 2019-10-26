@@ -12,7 +12,7 @@ var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update host entries from 'external' resource.",
 	Long: `
-Update will execute a GET request agains configured 'external.URL', and read returned body line by
+Update will execute a GET request against configured 'external.URL', and read returned body line by
 line, those lines will be transformed accordingly with 'external[n].transform' block, where lines
 can be subject to search-and-replace, or skipped, before data is stored.
 

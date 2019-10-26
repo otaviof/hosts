@@ -25,7 +25,7 @@ func (u *Update) readExternalURL(URL string) ([]byte, error) {
 	var resp *http.Response
 	var err error
 
-	log.Printf("External resoure URL: '%s'", URL)
+	log.Printf("External resource URL: '%s'", URL)
 	if resp, err = client.Get(URL); err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (u *Update) reCompile(t []Transform) (map[*regexp.Regexp]string, error) {
 	return reSearchReplace, nil
 }
 
-// transform content to either skip a line, or repliace contents based in regular expressions.
+// transform content to either skip a line, or replace contents based in regular expressions.
 func (u *Update) transform(content []byte, t []Transform) ([]byte, error) {
 	var reSearchReplace map[*regexp.Regexp]string
 	var reader = bufio.NewReader(bytes.NewReader(content))
