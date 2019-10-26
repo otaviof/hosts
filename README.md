@@ -29,11 +29,6 @@ go get -u github.com/otaviof/hosts/cmd/hosts
 Alternatively, when cloning this repository, execute:
 
 ``` bash
-# populate vendor
-make bootstrap
-# build project
-make
-# copy to bin directory
 make install
 ```
 
