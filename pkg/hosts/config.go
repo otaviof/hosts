@@ -1,61 +1,91 @@
 package hosts
 
 import (
-	"fmt"
-	"os"
-	"strings"
+	"io/ioutil"
+	"regexp"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
-// Config primary configuration file contents
+const (
+	configDir  = ".hosts"
+	ConfigFile = "hosts.yaml"
+	extension  = "host"
+)
+
+// Root configuration top level object.
+type Root struct {
+	Hosts Config `json:"hosts"`
+}
+
+// Config primary application configuration.
 type Config struct {
-	Hosts    Hosts      `yaml:"hosts"`
-	External []External `yaml:"external"`
+	Input  Input    `json:"input"`
+	Output []Output `json:"output"`
 }
 
-// Hosts `hosts` configuration block
-type Hosts struct {
-	BaseDirectory string `yaml:"baseDirectory"`
-	Output        string `yaml:"output"`
+// Input input sectin, for data obtained externally.
+type Input struct {
+	Sources         []Source         `json:"sources"`
+	Transformations []Transformation `json:"transformations"`
 }
 
-// External `external` configuration block
-type External struct {
-	URL       string      `yaml:"url"`
-	Output    string      `yaml:"output"`
-	Transform []Transform `yaml:"transform"`
+// Source input source, describes a single URI.
+type Source struct {
+	Name string `json:"name,omitempty"`
+	URI  string `json:"uri"`
+	File string `json:"file"`
 }
 
-// Transform search/replace based in regular expressions
-type Transform struct {
-	Search  string `yaml:"search"`
-	Replace string `yaml:"replace"`
+// Transformation describes how data obtained externally will be transformed.
+type Transformation struct {
+	Name    string `json:"name,omitempty"`
+	Search  string `json:"search"`
+	Replace string `json:"replace,omitempty"`
 }
 
-// Validate check if all required configuration fields are present.
+// Output describes a output file.
+type Output struct {
+	Name    string `json:"name,omitempty"`
+	Path    string `json:"path"`
+	Dnsmasq bool   `json:"dnsmasq,omitempty"`
+	With    string `json:"with,omitempty"`
+	Without string `json:"without,omitempty"`
+}
+
+func (o *Output) CompileREs() (*regexp.Regexp, *regexp.Regexp, error) {
+	var withRE *regexp.Regexp = nil
+	var withoutRE *regexp.Regexp = nil
+	var err error
+
+	if o.With != "" {
+		if withRE, err = regexp.Compile(o.With); err != nil {
+			return nil, nil, err
+		}
+	}
+	if o.Without != "" {
+		if withoutRE, err = regexp.Compile(o.Without); err != nil {
+			return nil, nil, err
+		}
+	}
+	return withRE, withoutRE, nil
+}
+
+// TODO: validate instantiated configuration
 func (c *Config) Validate() error {
-	if !isDir(c.Hosts.BaseDirectory) {
-		return fmt.Errorf("Can't find directory at: '%s'", c.Hosts.BaseDirectory)
-	}
-	if c.Hosts.Output == "" {
-		return fmt.Errorf("output is mandatory: '%s'", c.Hosts.Output)
-	}
 	return nil
 }
 
-// NewConfig creates a new configuration instance baed on yaml input.
-func NewConfig(path string) (*Config, error) {
-	var config = &Config{}
-	var err error
-
-	if err = yaml.Unmarshal(readFile(path), config); err != nil {
+// NewConfig creates a new configuration instance based informed file path.
+func NewConfig(configPath string) (*Config, error) {
+	data, err := ioutil.ReadFile(configPath)
+	if err != nil {
 		return nil, err
 	}
 
-	// expanding base directory
-	config.Hosts.BaseDirectory = strings.Replace(
-		config.Hosts.BaseDirectory, "~", os.Getenv("HOME"), 1)
-
-	return config, nil
+	root := &Root{}
+	if err = yaml.Unmarshal(data, root); err != nil {
+		return nil, err
+	}
+	return &root.Hosts, nil
 }

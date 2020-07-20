@@ -1,34 +1,22 @@
 package hosts
 
 import (
-	"fmt"
-	"log"
-	"os"
+	"path"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestConfigNewConfig(t *testing.T) {
-	var config *Config
-	var err error
+const testBaseDir = "../../test/hosts-dir"
 
-	config, err = NewConfig("../../configs/hosts.yaml")
-
-	log.Printf("Config: '%#v'", config)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, config)
-
-	assert.Equal(t, config.Hosts.BaseDirectory, fmt.Sprintf("%s/.hosts", os.Getenv("HOME")))
-	assert.True(t, config.Hosts.Output != "")
+func newConfig(t *testing.T) *Config {
+	cfg, err := NewConfig(path.Join(testBaseDir, "hosts.yaml"))
+	require.NoError(t, err, "should not error on parsing test configuration")
+	return cfg
 }
 
-func TestConfigValidate(t *testing.T) {
-	var config = &Config{}
-	var err error
+func TestNewConfig(t *testing.T) {
+	cfg := newConfig(t)
 
-	err = config.Validate()
-
-	assert.NotNil(t, err)
+	require.Len(t, cfg.Input.Sources, 1)
 }

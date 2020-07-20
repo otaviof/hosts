@@ -2,3 +2,4 @@
 .vscode
 build/
 vendor/
+test/hosts-dir/99-blocks.host

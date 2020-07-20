@@ -4,8 +4,6 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-
-	hosts "github.com/otaviof/hosts/pkg/hosts"
 )
 
 var updateCmd = &cobra.Command{
@@ -26,11 +24,8 @@ func init() {
 }
 
 func runUpdateCmd(cmd *cobra.Command, args []string) {
-	var config = getConfig()
-	var update = hosts.NewUpdate(config, dryRun)
-	var err error
-
-	if err = update.Execute(); err != nil {
+	hosts := newHosts()
+	if err := hosts.Update(); err != nil {
 		log.Fatalf("[ERROR] %s", err)
 	}
 }

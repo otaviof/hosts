@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	hosts "github.com/otaviof/hosts/pkg/hosts"
 	"github.com/spf13/cobra"
 )
 
@@ -29,15 +28,11 @@ func init() {
 }
 
 func runApplyCmd(cmd *cobra.Command, args []string) {
-	var config = getConfig()
-	var apply *hosts.Apply
-	var err error
-
-	if apply, err = hosts.NewApply(config, dryRun); err != nil {
+	hosts := newHosts()
+	if err := hosts.Load(); err != nil {
 		log.Fatalf("[ERROR] %s", err)
 	}
-
-	if err = apply.Execute(); err != nil {
+	if err := hosts.Apply(); err != nil {
 		log.Fatalf("[ERROR] %s", err)
 	}
 }

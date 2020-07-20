@@ -1,52 +1,49 @@
 package hosts
 
 import (
-	"io/ioutil"
-	"log"
+	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 )
 
-// readFile Wrap up a ioutil call, using fatal log in case of error.
-func readFile(path string) []byte {
-	log.Printf("Reading file: '%s'", path)
-
-	if !exists(path) {
-		log.Fatalf("Can't find file: '%s'", path)
-	}
-
-	fileBytes, err := ioutil.ReadFile(path)
+// DefaultConfigDir returns the default path to application's base directory.
+func DefaultConfigDir() (string, error) {
+	home, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	return fileBytes
+	dirPath := path.Join(home, configDir)
+	if info, err := os.Stat(dirPath); err != nil {
+		return "", err
+	} else if !info.IsDir() {
+		return "", fmt.Errorf("%s is not a directory", dirPath)
+	}
+	return dirPath, nil
 }
 
-// isDir Check if informed path is a directory, boolean return.
-func isDir(dirPath string) bool {
-	stat, err := os.Stat(dirPath)
+// DefaultConfigPath returns the full path to default configuration file location, in users's home.
+func DefaultConfigPath() (string, error) {
+	baseDir, err := DefaultConfigDir()
 	if err != nil {
-		return false
+		return "", err
 	}
-	return stat.IsDir()
+
+	filePath := path.Join(baseDir, ConfigFile)
+	if _, err := os.Stat(filePath); err != nil {
+		return "", err
+	}
+	return filePath, nil
 }
 
-// exists Check if path exists, boolean return.
-func exists(path string) bool {
-	if _, err := os.Stat(path); err != nil {
-		return false
+// dirGlob search for '.host' files in configured location.
+func dirGlob(dir string) ([]string, error) {
+	var files []string
+	var err error
+
+	pattern := fmt.Sprintf("*.%s", extension)
+	if files, err = filepath.Glob(filepath.Join(dir, pattern)); err != nil {
+		return nil, err
 	}
-	return true
-}
-
-// stringSliceContains checks if a slice contiains a string.
-func stringSliceContains(slice []string, str string) bool {
-	var sliceStr string
-
-	for _, sliceStr = range slice {
-		if str == sliceStr {
-			return true
-		}
-	}
-
-	return false
+	return files, nil
 }

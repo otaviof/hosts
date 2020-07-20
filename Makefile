@@ -24,7 +24,7 @@ test-unit:
 	go test $(GO_COMMON_FLAGS) -timeout=$(TEST_TIMEOUT) ./...
 
 install: build
-	go install $(GO_COMMON_FLAGS) cmd/$(APP)/*
+	cp -v $(OUTPUT_DIR)/$(APP) $(GOPATH)/bin/
 
 run:
 	go run $(GO_COMMON_FLAGS) cmd/$(APP)/* $(RUN_ARGS)
