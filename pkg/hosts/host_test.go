@@ -18,7 +18,7 @@ func TestNewHost(t *testing.T) {
 		{
 			"valid entry",
 			args{entry: "127.0.0.1	localhost"},
-			&Host{Address: "127.0.0.1", Host: "localhost"},
+			&Host{Address: "127.0.0.1", Hostnames: "localhost"},
 			false,
 		},
 		{

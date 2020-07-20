@@ -49,7 +49,7 @@ func (f *File) Load(r io.Reader) error {
 func (f *File) Save() error {
 	payload := []byte{}
 	for _, h := range f.Content {
-		line := fmt.Sprintf("%s %s\n", h.Address, h.Host)
+		line := fmt.Sprintf("%s %s\n", h.Address, h.Hostnames)
 		payload = append(payload, []byte(line)...)
 	}
 	return ioutil.WriteFile(f.filePath, payload, 0644)

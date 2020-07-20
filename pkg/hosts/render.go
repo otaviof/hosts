@@ -58,7 +58,7 @@ func (r *Render) loopFilesContent(files []*File, fn formatterFn) []byte {
 	for _, f := range files {
 		payload = append(payload, []byte(fmt.Sprintf("### %s\n", f.Name()))...)
 		for _, h := range f.Content {
-			hostnames := strings.Split(h.Host, " ")
+			hostnames := strings.Split(h.Hostnames, " ")
 			data := fn(h.Address, hostnames)
 			payload = append(payload, []byte(data)...)
 		}
@@ -94,7 +94,7 @@ func (r *Render) Output(output Output) error {
 	return ioutil.WriteFile(output.Path, payload, 0644)
 }
 
-// NNewRender instantiate a render by informing all files instances.
+// NewRender instantiate a render by informing all files instances.
 func NewRender(files []*File) *Render {
 	return &Render{files: files}
 }
