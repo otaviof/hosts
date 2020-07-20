@@ -75,7 +75,7 @@ alternatively you can employ `--base-dir` parameter to inform a different base d
 
 To start, copy the example configuration:
 
-``` bash
+```sh
 mkdir ~/.hosts
 cp -v test/hosts-dir/hosts.yaml ~/.hosts
 ${EDITOR} ~/.hosts/hosts.yaml
@@ -83,9 +83,9 @@ ${EDITOR} ~/.hosts/hosts.yaml
 
 ### Host Files
 
-This application will look for `.host` files in the base direrctory location. You can find example
+This application will look for `.host` files in the base directory location. You can find example
 of those files in [`test/hosts-dir`](https://github.com/otaviof/hosts/tree/master/test/hosts-dir),
-the formatting is the same than `/etc/hosts` file.
+the formatting is the same [than `/etc/hosts` file](https://man7.org/linux/man-pages/man5/hosts.5.html).
 
 For instance:
 

@@ -8,9 +8,12 @@ import (
 )
 
 const (
-	configDir  = ".hosts"
+	// configDir default configuration directory.
+	configDir = ".hosts"
+	// ConfigFile default configuration file name.
 	ConfigFile = "hosts.yaml"
-	extension  = "host"
+	// extension default extension name.
+	extension = "host"
 )
 
 // Root configuration top level object.
@@ -53,9 +56,10 @@ type Output struct {
 	Without string `json:"without,omitempty"`
 }
 
+// CompileREs compile regular-expressions found in the output instance.
 func (o *Output) CompileREs() (*regexp.Regexp, *regexp.Regexp, error) {
-	var withRE *regexp.Regexp = nil
-	var withoutRE *regexp.Regexp = nil
+	var withRE *regexp.Regexp
+	var withoutRE *regexp.Regexp
 	var err error
 
 	if o.With != "" {
@@ -71,8 +75,9 @@ func (o *Output) CompileREs() (*regexp.Regexp, *regexp.Regexp, error) {
 	return withRE, withoutRE, nil
 }
 
-// TODO: validate instantiated configuration
+// Validate ...
 func (c *Config) Validate() error {
+	// TODO: validate instantiated configuration
 	return nil
 }
 
