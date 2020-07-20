@@ -22,13 +22,13 @@ into their own files, and also move this type of data back to user home.
 
 The easiest way to install `hosts` is via `go get`:
 
-``` bash
+```sh
 go get -u github.com/otaviof/hosts/cmd/hosts
 ```
 
 Alternatively, when cloning this repository, execute:
 
-``` bash
+```sh
 make install
 ```
 
@@ -36,50 +36,56 @@ make install
 
 The following example configuration has fields description as comments, please consider.
 
-``` yaml
+```yml
+---
 hosts:
-  # base directory where to look for `.host` files
-  baseDirectory: ~/.hosts
-  # final output file
-  output: /etc/hosts
-
-# external resources
-external:
-  # read "body" from external URL
-  - url: https://someonewhocares.org/hosts/hosts
-    # file name to save contents, under `hosts.baseDirectory`
-    output: 99-blocks.host
-    # transform downloaded contents line-by-line
-    transform:
-      # search using a regular expression
-      - search: 127.0.0.1
-        # replace with
-        replace: 0.0.0.0
-      # regular expression using a match group
-      - search: (\w+.*?)#.*?$
-        # replacing with match group
-        replace: $1
-      # when `replace` is empty, the line is skipped
-      - search: ^#.*?$
-      # skipping localhost related entries
+  input:
+    # external data sources
+    sources:
+      # input name
+      - name: uBlockOrigin
+        # external resource location
+        uri: https://github.com/uBlockOrigin/uAssets/raw/master/thirdparties/www.malwaredomainlist.com/hostslist/hosts.txt
+        # destination file
+        file:  99-blocks.host
+    transformations:
+      # search by regular-expression
+      - search: "127.0.0.1"
+        # replace with string
+        replace: "0.0.0.0"
+      # search without replace blocks, are skipped
       - search: ^.*?(local|localhost|broadcasthost|ip6).*?$
+      - search: ^\s+#.*?$
+  # output files generated
+  output:
+    # output name
+    - name: etc-hosts
+      # output file path
+      path: /etc/hosts
+      # without files matching regular expression
+      without: 99-blocks.*
+    - name: dnsmasq-blocks
+      path: /etc/dnsmasq.d/blocks.conf
+      # only with files matching regular expression
+      with: 99-blocks.*
 ```
 
-The default location the configuration file is at `/usr/local/etc/hosts.yaml`, or alternatively
-you can employ `--config` parameter to inform a different location.
+The default location the configuration file is at `~/.hosts/hosts.yaml` (`~/.hosts`), or
+alternatively you can employ `--base-dir` parameter to inform a different base directory.
 
 To start, copy the example configuration:
 
 ``` bash
-cp -v configs/hosts.yaml /usr/local/etc/
+mkdir ~/.hosts
+cp -v test/hosts-dir/hosts.yaml ~/.hosts
+${EDITOR} ~/.hosts/hosts.yaml
 ```
 
 ### Host Files
 
-This application will look for `.host` files in the `hosts.baseDirectory` location. You can find
-example of those files in
-[`test/hosts-dir`](https://github.com/otaviof/hosts/tree/master/test/hosts-dir), the formatting is
-the same than `/etc/hosts` file.
+This application will look for `.host` files in the base direrctory location. You can find example
+of those files in [`test/hosts-dir`](https://github.com/otaviof/hosts/tree/master/test/hosts-dir),
+the formatting is the same than `/etc/hosts` file.
 
 For instance:
 
@@ -101,30 +107,21 @@ Therefore, `hosts` provide a way to load the external resource and apply regular
 transformation, which can modify contents and skip certain lines. Please consider
 [configuration](#configuration) section.
 
+### DNSMasq
+
+Alternatively, instead of generating `/etc/hosts` format, this application can generate the format
+employed on [`dnsmasq.conf` files ](http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html).
+The flag to turn this formatter on is under `hosts.output` as the following example:
+
+```yml
+---
+hosts:
+  output:
+    - name: dnsmasq-blocks
+      path: /etc/dnsmasq.d/blocks.conf
+```
+
 ## Usage
 
-This command-line utility will inspect `hosts.baseDirectory`, and the `*.host` files found over
-there are combined to create a new `/etc/hosts` files, accordingly to configuration.
-
-The sequence of files in this directory is kept based on alpha-numeric ordering, therefore it's
-encouraged to name files starting with numbers, like `00-first.host`, `10-second.host` and so forth.
-
-The following parameters are applicable to all sub-commands:
-
-- `--config`: alternative location of the configuration file;
-- `--dry-run`: do not apply changes;
-- `--help`: inline help message;
-
-To generate your hosts file, use `apply` command:
-
-``` bash
-hosts apply --dry-run
-```
-
-And to read from `external` resource, use:
-
-``` bash
-hosts update --dry-run
-```
-
-Rinse and repeat.
+For the command line parameters, please use `hosts --help` and inspect the sub-commands `update` and
+`apply` as well.
