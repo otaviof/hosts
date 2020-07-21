@@ -1,6 +1,7 @@
 package hosts
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"regexp"
@@ -10,13 +11,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ConfigFile default configuration file name.
+const ConfigFile = "hosts.yaml"
+
 const (
 	// configDir default configuration directory.
 	configDir = ".hosts"
-	// ConfigFile default configuration file name.
-	ConfigFile = "hosts.yaml"
 	// extension default extension name.
 	extension = "host"
+)
+
+var (
+	requireAttributeErr = errors.New("required attribute not informed")
+	invalidRegexErr     = errors.New("invalid regular-expresssion")
 )
 
 // Root configuration top level object.
@@ -92,20 +99,21 @@ func (c *Config) Validate() error {
 	if len(c.Input.Sources) > 0 {
 		for i, s := range c.Input.Sources {
 			if s.File == "" {
-				return fmt.Errorf("[%d] file is not defined in source '%s'", i, s.Name)
+				return fmt.Errorf("%w: hosts.input.sources[%d].file", requireAttributeErr, i)
 			}
 			if s.URL == "" {
-				return fmt.Errorf("[%d] URL is not defined in source '%s'", i, s.Name)
+				return fmt.Errorf("%w: hosts.input.sources[%d].url", requireAttributeErr, i)
 			}
 		}
 	}
 	if len(c.Input.Transformations) > 0 {
 		for i, t := range c.Input.Transformations {
 			if t.Search == "" {
-				return fmt.Errorf("[%d] search regular-expression is not defined", i)
+				return fmt.Errorf("%w: hosts.input.transformations[%d].search",
+					requireAttributeErr, i)
 			}
 			if _, err := t.CompileRE(); err != nil {
-				return fmt.Errorf("[%d] %v", i, err)
+				return fmt.Errorf("%w: hosts.input.transformations[%d].search", err, i)
 			}
 		}
 	}
@@ -115,10 +123,10 @@ func (c *Config) Validate() error {
 	} else {
 		for i, o := range c.Output {
 			if _, _, err := o.CompileREs(); err != nil {
-				return fmt.Errorf("[%d] %v", i, err)
+				return fmt.Errorf("%w: hosts.output[%d].(with|without)", err, i)
 			}
 			if o.Path == "" {
-				return fmt.Errorf("[%d] path is not defined in output '%s'", i, o.Name)
+				return fmt.Errorf("%w: hosts.output[%d].path", requireAttributeErr, i)
 			}
 		}
 	}

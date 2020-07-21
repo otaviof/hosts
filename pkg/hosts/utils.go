@@ -1,6 +1,7 @@
 package hosts
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -8,6 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 )
+
+var baseDirNotFoundErr = errors.New("base directory not found")
 
 // SetLogLevel set the log level based on parameter.
 func SetLogLevel(level int) {
@@ -25,7 +28,7 @@ func DefaultConfigDir() (string, error) {
 	if info, err := os.Stat(dirPath); err != nil {
 		return "", err
 	} else if !info.IsDir() {
-		return "", fmt.Errorf("%s is not a directory", dirPath)
+		return "", fmt.Errorf("%w: %s", baseDirNotFoundErr, dirPath)
 	}
 	return dirPath, nil
 }
