@@ -9,21 +9,22 @@ import (
 
 // Hosts represents the application itself, implementing the endpoints of sub-commaands.
 type Hosts struct {
-	cfg     *Config // application configuration
-	baseDir string  // base directory path
-	files   []*File // instantiated files
+	logger  *log.Entry // logger
+	cfg     *Config    // application configuration
+	baseDir string     // base directory path
+	files   []*File    // instantiated files
 }
 
 // Load read dot-host files in base directory.
 func (h *Hosts) Load() error {
-	log.Info("Loading host files...")
+	h.logger.Info("Loading host files...")
 	files, err := dirGlob(h.baseDir)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
-		log.Infof("Reading file '%s'", file)
+		h.logger.Infof("Reading file '%s'", file)
 		f := NewFile(file)
 		if err = f.Read(); err != nil {
 			return err
@@ -35,28 +36,28 @@ func (h *Hosts) Load() error {
 
 // Update external sources of data, save parsed content in dot-host files.
 func (h *Hosts) Update() error {
-	log.Infof("Updating external data sources (%d)", len(h.cfg.Input.Sources))
 	t, err := NewTransformer(h.cfg.Input.Transformations)
 	if err != nil {
 		return err
 	}
 
+	h.logger.Infof("Updating external data sources (%d)", len(h.cfg.Input.Sources))
 	for _, source := range h.cfg.Input.Sources {
-		logger := log.WithFields(log.Fields{
+		logger := h.logger.WithFields(log.Fields{
 			"name": source.Name,
-			"URI":  source.URI,
+			"URI":  source.URL,
 			"file": source.File,
 		})
 
 		u := NewUpdater(t)
 		logger.Infof("Updating external source")
-		payload, err := u.Get(source.URI)
+		payload, err := u.Get(source.URL)
 		if err != nil {
 			return err
 		}
 
 		filePath := path.Join(h.baseDir, source.File)
-		log.Debugf("Saving data at '%s'", filePath)
+		logger.Infof("Saving data at '%s'", filePath)
 		f := NewFile(filePath)
 		if err = f.Load(bytes.NewReader(payload)); err != nil {
 			return err
@@ -83,6 +84,7 @@ func (h *Hosts) Apply() error {
 // NewHosts instante hosts application primary object.
 func NewHosts(cfg *Config, baseDir string) *Hosts {
 	return &Hosts{
+		logger:  log.WithField("component", "hosts"),
 		cfg:     cfg,
 		baseDir: baseDir,
 		files:   []*File{},

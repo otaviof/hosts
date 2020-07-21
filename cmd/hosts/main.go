@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"path"
 
 	hosts "github.com/otaviof/hosts/pkg/hosts"
@@ -23,27 +22,23 @@ source-of-authority you can include and exclude parts to generate those files.
 `,
 }
 
-var logLevel int
-var baseDir string
-var dryRun bool
+var (
+	logLevel int
+	baseDir  string
+	dryRun   bool
+)
 
 func init() {
-	var flags = rootCmd.PersistentFlags()
+	flags := rootCmd.PersistentFlags()
 
 	flags.IntVar(&logLevel, "log-level", int(log.InfoLevel), "configuration file path")
 	flags.StringVar(&baseDir, "base-dir", "", "configuration file path")
 	flags.BoolVar(&dryRun, "dry-run", false, "dry-run mode")
 }
 
-// setLogLevel set the log level based on parameter.
-func setLogLevel() {
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.Level(logLevel))
-}
-
 // newHosts instantiate the application and configuration.
 func newHosts() *hosts.Hosts {
-	setLogLevel()
+	hosts.SetLogLevel(logLevel)
 
 	if baseDir == "" {
 		var err error
@@ -56,7 +51,10 @@ func newHosts() *hosts.Hosts {
 
 	cfg, err := hosts.NewConfig(configPath)
 	if err != nil {
-		log.Fatalf("error instantiating config: %s", err)
+		log.Fatalf("error instantiating config: '%v'", err)
+	}
+	if err = cfg.Validate(); err != nil {
+		log.Fatalf("error validating configuration: '%v'", err)
 	}
 
 	return hosts.NewHosts(cfg, baseDir)

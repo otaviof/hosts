@@ -3,16 +3,16 @@ hosts:
   input:
     sources:
       - name: online-services-block-list
-        uri: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+        url: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
         file: 99-blocks.host
     transformations:
-      - name: non-resolvable-address
-        search: "127.0.0.1"
+      - search: "127.0.0.1"
         replace: "0.0.0.0"
   output:
     - name: hosts-localhost
       path: /var/tmp/hosts-localhost.test
       with: .*localhost.*
+      mode: 0644
     - name: dnsmasq-blocks
       dnsmasq: true
       path: /var/tmp/dnsmasq-blocks.masq

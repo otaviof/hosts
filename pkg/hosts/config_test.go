@@ -18,5 +18,8 @@ func newConfig(t *testing.T) *Config {
 func TestNewConfig(t *testing.T) {
 	cfg := newConfig(t)
 
-	require.Len(t, cfg.Input.Sources, 1)
+	t.Run("validate", func(t *testing.T) {
+		err := cfg.Validate()
+		require.NoError(t, err, "should not error on validation")
+	})
 }

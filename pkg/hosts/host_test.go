@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+func init() {
+	SetLogLevel(6)
+}
+
 func TestNewHost(t *testing.T) {
 	type args struct {
 		entry string

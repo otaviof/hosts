@@ -53,19 +53,23 @@ hosts:
       - search: "127.0.0.1"
         # replace with string
         replace: "0.0.0.0"
-      # search without replace blocks, are skipped
+      # search without replace block means skipping the whole line
       - search: ^.*?(local|localhost|broadcasthost|ip6).*?$
       - search: ^\s+#.*?$
   # output files generated
   output:
     # output name
     - name: etc-hosts
-      # output file path
+      # output file target path
       path: /etc/hosts
       # without files matching regular expression
       without: 99-blocks.*
+      # file permission mode, by default 0600
+      mode: 0644
     - name: dnsmasq-blocks
       path: /etc/dnsmasq.d/blocks.conf
+      # when set to true, the file format is based on dnsmasq.conf files
+      dnsmasq: true
       # only with files matching regular expression
       with: 99-blocks.*
 ```
@@ -118,6 +122,7 @@ The flag to turn this formatter on is under `hosts.output` as the following exam
 hosts:
   output:
     - name: dnsmasq-blocks
+      dnsmasq: true
       path: /etc/dnsmasq.d/blocks.conf
 ```
 
@@ -125,3 +130,17 @@ hosts:
 
 For the command line parameters, please use `hosts --help` and inspect the sub-commands `update` and
 `apply` as well.
+
+The daily basis usage would be to edit files under `~/.hosts` (as the
+[example here](https://github.com/otaviof/hosts/tree/master/test/hosts-dir)), and run:
+
+```sh
+# updating external data sources
+hosts update
+
+# creating the target (output) file(s)
+sudo hosts apply
+```
+
+In daily basis, running `hosts update` would a optional task, while `hosts apply` must take place
+every time the output files must be updated.

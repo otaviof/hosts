@@ -11,20 +11,22 @@ import (
 // Updater executes the update process of external data sources. Also handles the expected
 // transformation of data, informed in configuration file.
 type Updater struct {
-	client      http.Client
-	transformer *Transformer
+	logger      *log.Entry   // logger
+	client      http.Client  // http client
+	transformer *Transformer // transformer instance
 }
 
 // Get executes a http.Get against informed URI. The data obtained goes through the transformer rules
 // before being returned by this method.
 func (u *Updater) Get(uri string) ([]byte, error) {
+	u.logger.Debugf("Making a request on '%s'", uri)
 	response, err := u.client.Get(uri)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	log.Debugf("Returned status code '%d'", response.StatusCode)
+	u.logger.Debugf("Returned status code '%d'", response.StatusCode)
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("server returned non-expected status '%d'", response.StatusCode)
 	}
@@ -38,5 +40,8 @@ func (u *Updater) Get(uri string) ([]byte, error) {
 
 // NewUpdater instantiate a updater with a transformer instance.
 func NewUpdater(t *Transformer) *Updater {
-	return &Updater{transformer: t}
+	return &Updater{
+		logger:      log.WithField("component", "updater"),
+		transformer: t,
+	}
 }

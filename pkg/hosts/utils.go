@@ -5,7 +5,15 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 )
+
+// SetLogLevel set the log level based on parameter.
+func SetLogLevel(level int) {
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.Level(level))
+}
 
 // DefaultConfigDir returns the default path to application's base directory.
 func DefaultConfigDir() (string, error) {

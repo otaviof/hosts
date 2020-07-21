@@ -7,8 +7,8 @@ import (
 
 // Host represent a single host file line, with address and host section.
 type Host struct {
-	Address   string
-	Hostnames string
+	Address   string // ip address
+	Hostnames string // hostname and aliases
 }
 
 // parseRE regular expression to parse host lines.

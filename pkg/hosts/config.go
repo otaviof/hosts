@@ -1,10 +1,13 @@
 package hosts
 
 import (
+	"fmt"
 	"io/ioutil"
 	"regexp"
 
 	"gopkg.in/yaml.v2"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -18,42 +21,50 @@ const (
 
 // Root configuration top level object.
 type Root struct {
-	Hosts Config `json:"hosts"`
+	Hosts Config `json:"hosts"` // root
 }
 
 // Config primary application configuration.
 type Config struct {
-	Input  Input    `json:"input"`
-	Output []Output `json:"output"`
+	Input  Input    `json:"input"`  // input block, data coming from external sources
+	Output []Output `json:"output"` // output block, files that will be created
 }
 
-// Input input sectin, for data obtained externally.
+// Input input section, for data obtained externally.
 type Input struct {
-	Sources         []Source         `json:"sources"`
-	Transformations []Transformation `json:"transformations"`
+	Sources         []Source         `json:"sources"`         // slice of sources
+	Transformations []Transformation `json:"transformations"` // slice of transformations
 }
 
 // Source input source, describes a single URI.
 type Source struct {
-	Name string `json:"name,omitempty"`
-	URI  string `json:"uri"`
-	File string `json:"file"`
+	Name string `json:"name,omitempty"` // data source name
+	URL  string `json:"url"`            // resource url
+	File string `json:"file"`           // file name to store collected data
 }
 
 // Transformation describes how data obtained externally will be transformed.
 type Transformation struct {
-	Name    string `json:"name,omitempty"`
-	Search  string `json:"search"`
-	Replace string `json:"replace,omitempty"`
+	Search  string `json:"search"`            // search regular expresssion
+	Replace string `json:"replace,omitempty"` // replace with
+}
+
+// CompileRE compiles the regular expression in search attribute.
+func (t *Transformation) CompileRE() (*regexp.Regexp, error) {
+	if t.Search == "" {
+		return nil, nil
+	}
+	return regexp.Compile(t.Search)
 }
 
 // Output describes a output file.
 type Output struct {
-	Name    string `json:"name,omitempty"`
-	Path    string `json:"path"`
-	Dnsmasq bool   `json:"dnsmasq,omitempty"`
-	With    string `json:"with,omitempty"`
-	Without string `json:"without,omitempty"`
+	Name    string `json:"name,omitempty"`    // output name
+	Path    string `json:"path"`              // output file full path
+	Dnsmasq bool   `json:"dnsmasq,omitempty"` // format as dnsmasq
+	With    string `json:"with,omitempty"`    // with files, regular-expression
+	Without string `json:"without,omitempty"` // without files, regular-expression
+	Mode    int    `json:"mode,omitempty"`    // file mode
 }
 
 // CompileREs compile regular-expressions found in the output instance.
@@ -75,9 +86,43 @@ func (o *Output) CompileREs() (*regexp.Regexp, *regexp.Regexp, error) {
 	return withRE, withoutRE, nil
 }
 
-// Validate ...
+// Validate inspect instantiated configuration to check if required fields are defined, and regular
+// expressions are able to be compiled.
 func (c *Config) Validate() error {
-	// TODO: validate instantiated configuration
+	if len(c.Input.Sources) > 0 {
+		for i, s := range c.Input.Sources {
+			if s.File == "" {
+				return fmt.Errorf("[%d] file is not defined in source '%s'", i, s.Name)
+			}
+			if s.URL == "" {
+				return fmt.Errorf("[%d] URL is not defined in source '%s'", i, s.Name)
+			}
+		}
+	}
+	if len(c.Input.Transformations) > 0 {
+		for i, t := range c.Input.Transformations {
+			if t.Search == "" {
+				return fmt.Errorf("[%d] search regular-expression is not defined", i)
+			}
+			if _, err := t.CompileRE(); err != nil {
+				return fmt.Errorf("[%d] %v", i, err)
+			}
+		}
+	}
+
+	if len(c.Output) == 0 {
+		log.Warn("No output files will be created!")
+	} else {
+		for i, o := range c.Output {
+			if _, _, err := o.CompileREs(); err != nil {
+				return fmt.Errorf("[%d] %v", i, err)
+			}
+			if o.Path == "" {
+				return fmt.Errorf("[%d] path is not defined in output '%s'", i, o.Name)
+			}
+		}
+	}
+
 	return nil
 }
 

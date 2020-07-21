@@ -11,8 +11,8 @@ import (
 
 // File reprents a dot-host file under application base directory.
 type File struct {
-	filePath string
-	Content  []*Host
+	filePath string  // full path to file
+	Content  []*Host // host entries
 }
 
 // Name file name.
@@ -52,7 +52,7 @@ func (f *File) Save() error {
 		line := fmt.Sprintf("%s %s\n", h.Address, h.Hostnames)
 		payload = append(payload, []byte(line)...)
 	}
-	return ioutil.WriteFile(f.filePath, payload, 0644)
+	return ioutil.WriteFile(f.filePath, payload, 0o600)
 }
 
 // NewFile instantiate a file by path.

@@ -5,11 +5,14 @@ import (
 	"bytes"
 	"io"
 	"regexp"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Transformer represents the transformations applied to data. It holds the regular-expressions
 // compiled, and apply them against each line replacing data or skipping lines.
 type Transformer struct {
+	logger             *log.Entry                // logger
 	transformations    []Transformation          // list of transformations
 	regularExpressions map[*regexp.Regexp]string // map of compiled regexp and replace
 }
@@ -21,6 +24,8 @@ func (t *Transformer) applyREs(payload []byte) []byte {
 		if !search.Match(payload) {
 			continue
 		}
+		t.logger.Tracef("Line matches regular-expression '%s' (replace '%s'): '%s'",
+			search.String(), replace, payload)
 		if replace == "" {
 			return nil
 		}
@@ -53,7 +58,9 @@ func (t *Transformer) Transform(payload []byte) ([]byte, error) {
 // internal representation. A shared map holds compiled regular expression and the replace string.
 func (t *Transformer) compileREs() error {
 	for _, transformation := range t.transformations {
-		re, err := regexp.Compile(transformation.Search)
+		re, err := transformation.CompileRE()
+		t.logger.Debugf("Compiling regular-expression for search '%s', replace '%s'",
+			transformation.Search, transformation.Replace)
 		if err != nil {
 			return err
 		}
@@ -65,6 +72,7 @@ func (t *Transformer) compileREs() error {
 // NewTransformer instantiate a new transformer by compiling and preparing regular-expressions.
 func NewTransformer(transformations []Transformation) (*Transformer, error) {
 	t := &Transformer{
+		logger:             log.WithField("component", "transformer"),
 		transformations:    transformations,
 		regularExpressions: map[*regexp.Regexp]string{},
 	}

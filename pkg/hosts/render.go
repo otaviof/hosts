@@ -3,6 +3,7 @@ package hosts
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
 
@@ -11,7 +12,8 @@ import (
 
 // Render represents the render component that format collected data into desired output files.
 type Render struct {
-	files []*File // host files available
+	logger *log.Entry // logger
+	files  []*File    // host files available
 }
 
 // formatterFn signature for functions used on formatting.
@@ -26,9 +28,14 @@ func (r *Render) selectFiles(withRE, withoutRE *regexp.Regexp) []*File {
 			continue
 		}
 
-		if withRE != nil && !withRE.MatchString(f.Name()) {
+		name := f.Name()
+		if withRE != nil && !withRE.MatchString(name) {
+			r.logger.Debugf("Skipping file '%s' by not matching with clause ('%s')",
+				name, withRE.String())
 			continue
-		} else if withoutRE != nil && withoutRE.MatchString(f.Name()) {
+		} else if withoutRE != nil && withoutRE.MatchString(name) {
+			r.logger.Debugf("Skipping file '%s' by matching without clause ('%s')",
+				name, withoutRE.String())
 			continue
 		}
 		selected = append(selected, f)
@@ -56,6 +63,7 @@ func (r *Render) dnsmasqFormatter(address string, hostnames []string) string {
 func (r *Render) loopFilesContent(files []*File, fn formatterFn) []byte {
 	payload := []byte{}
 	for _, f := range files {
+		r.logger.Debugf("Processing file: '%s'", f.Name())
 		payload = append(payload, []byte(fmt.Sprintf("### %s\n", f.Name()))...)
 		for _, h := range f.Content {
 			hostnames := strings.Split(h.Hostnames, " ")
@@ -68,11 +76,12 @@ func (r *Render) loopFilesContent(files []*File, fn formatterFn) []byte {
 
 // Output render payload into desired output file.
 func (r *Render) Output(output Output) error {
-	logger := log.WithFields(log.Fields{
+	logger := r.logger.WithFields(log.Fields{
 		"name":    output.Name,
 		"path":    output.Path,
 		"with":    output.With,
 		"without": output.Without,
+		"mode":    output.Mode,
 	})
 
 	logger.Debugf("Compiling regular expressions")
@@ -88,13 +97,22 @@ func (r *Render) Output(output Output) error {
 	}
 
 	selectedFiles := r.selectFiles(withRE, withoutRE)
-	logger.Debugf("Files selected: '%#v'", selectedFiles)
+	logger.Debugf("Amount of files selected: '%d'", len(selectedFiles))
 	payload := r.loopFilesContent(selectedFiles, fn)
 	logger.Debugf("File size '%d' bytes", len(payload))
-	return ioutil.WriteFile(output.Path, payload, 0644)
+
+	mode := int(0o600)
+	if output.Mode > 0 {
+		mode = output.Mode
+	}
+	logger.Infof("Writting file '%s' (%d bytes)", output.Path, len(payload))
+	return ioutil.WriteFile(output.Path, payload, os.FileMode(mode))
 }
 
 // NewRender instantiate a render by informing all files instances.
 func NewRender(files []*File) *Render {
-	return &Render{files: files}
+	return &Render{
+		logger: log.WithField("component", "render"),
+		files:  files,
+	}
 }
