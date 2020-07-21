@@ -77,12 +77,17 @@ func (r *Render) loopFilesContent(files []*File, fn formatterFn) []byte {
 
 // Output render payload into desired output file.
 func (r *Render) Output(output Output) error {
+	mode := os.FileMode(0o600)
+	if output.Mode > 0 {
+		mode = os.FileMode(output.Mode)
+	}
+
 	logger := r.logger.WithFields(log.Fields{
 		"name":    output.Name,
 		"path":    output.Path,
 		"with":    output.With,
 		"without": output.Without,
-		"mode":    output.Mode,
+		"mode":    mode.String(),
 		"dry-run": r.dryRun,
 	})
 
@@ -103,18 +108,13 @@ func (r *Render) Output(output Output) error {
 	payload := r.loopFilesContent(selectedFiles, fn)
 	logger.Debugf("File size '%d' bytes", len(payload))
 
-	mode := int(0o600)
-	if output.Mode > 0 {
-		mode = output.Mode
-	}
-
 	logger.Infof("Writting file '%s' (%d bytes)", output.Path, len(payload))
 	if r.dryRun {
 		logger.Info("Dry-run mode, file is not written.")
 		logger.Tracef("%s", payload)
 		return nil
 	}
-	return ioutil.WriteFile(output.Path, payload, os.FileMode(mode))
+	return ioutil.WriteFile(output.Path, payload, mode)
 }
 
 // NewRender instantiate a render by informing all files instances.
