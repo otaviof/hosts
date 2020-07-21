@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // File reprents a dot-host file under application base directory.
@@ -37,7 +39,7 @@ func (f *File) Load(r io.Reader) error {
 	for scanner.Scan() {
 		h, err := NewHost(scanner.Text())
 		if err != nil {
-			// TODO: add logging to when it skips lines
+			log.Warnf("Skipping: '%s'", err)
 			continue
 		}
 		f.Content = append(f.Content, h)
