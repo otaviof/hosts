@@ -13,6 +13,7 @@ type Hosts struct {
 	cfg     *Config    // application configuration
 	baseDir string     // base directory path
 	files   []*File    // instantiated files
+	dryRun  bool       // dry-run flag
 }
 
 // Load read dot-host files in base directory.
@@ -44,9 +45,10 @@ func (h *Hosts) Update() error {
 	h.logger.Infof("Updating external data sources (%d)", len(h.cfg.Input.Sources))
 	for _, source := range h.cfg.Input.Sources {
 		logger := h.logger.WithFields(log.Fields{
-			"name": source.Name,
-			"URI":  source.URL,
-			"file": source.File,
+			"name":    source.Name,
+			"URI":     source.URL,
+			"file":    source.File,
+			"dry-run": h.dryRun,
 		})
 
 		u := NewUpdater(t)
@@ -62,8 +64,13 @@ func (h *Hosts) Update() error {
 		if err = f.Load(bytes.NewReader(payload)); err != nil {
 			return err
 		}
-		if err = f.Save(); err != nil {
-			return err
+		if h.dryRun {
+			logger.Info("Dry-run mode, file not saved.")
+			logger.Tracef("%s", payload)
+		} else {
+			if err = f.Save(); err != nil {
+				return err
+			}
 		}
 		logger.Info("Done")
 	}
@@ -72,7 +79,7 @@ func (h *Hosts) Update() error {
 
 // Apply render output file based on data on base-dir.
 func (h *Hosts) Apply() error {
-	r := NewRender(h.files)
+	r := NewRender(h.files, false)
 	for _, output := range h.cfg.Output {
 		if err := r.Output(output); err != nil {
 			return err
@@ -82,11 +89,12 @@ func (h *Hosts) Apply() error {
 }
 
 // NewHosts instante hosts application primary object.
-func NewHosts(cfg *Config, baseDir string) *Hosts {
+func NewHosts(cfg *Config, baseDir string, dryRun bool) *Hosts {
 	return &Hosts{
 		logger:  log.WithField("component", "hosts"),
 		cfg:     cfg,
 		baseDir: baseDir,
 		files:   []*File{},
+		dryRun:  dryRun,
 	}
 }

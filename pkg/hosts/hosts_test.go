@@ -10,7 +10,7 @@ import (
 
 func TestNewHosts(t *testing.T) {
 	cfg := newConfig(t)
-	hosts := NewHosts(cfg, testBaseDir)
+	hosts := NewHosts(cfg, testBaseDir, false)
 
 	// cleaning up blocks file before testing
 	_ = os.RemoveAll(path.Join(testBaseDir, cfg.Input.Sources[0].File))

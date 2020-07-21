@@ -14,6 +14,7 @@ import (
 type Render struct {
 	logger *log.Entry // logger
 	files  []*File    // host files available
+	dryRun bool       // dry-run flag
 }
 
 // formatterFn signature for functions used on formatting.
@@ -82,6 +83,7 @@ func (r *Render) Output(output Output) error {
 		"with":    output.With,
 		"without": output.Without,
 		"mode":    output.Mode,
+		"dry-run": r.dryRun,
 	})
 
 	logger.Debugf("Compiling regular expressions")
@@ -105,14 +107,21 @@ func (r *Render) Output(output Output) error {
 	if output.Mode > 0 {
 		mode = output.Mode
 	}
+
 	logger.Infof("Writting file '%s' (%d bytes)", output.Path, len(payload))
+	if r.dryRun {
+		logger.Info("Dry-run mode, file is not written.")
+		logger.Tracef("%s", payload)
+		return nil
+	}
 	return ioutil.WriteFile(output.Path, payload, os.FileMode(mode))
 }
 
 // NewRender instantiate a render by informing all files instances.
-func NewRender(files []*File) *Render {
+func NewRender(files []*File, dryRun bool) *Render {
 	return &Render{
 		logger: log.WithField("component", "render"),
 		files:  files,
+		dryRun: dryRun,
 	}
 }

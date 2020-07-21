@@ -57,7 +57,7 @@ func newHosts() *hosts.Hosts {
 		log.Fatalf("error validating configuration: '%v'", err)
 	}
 
-	return hosts.NewHosts(cfg, baseDir)
+	return hosts.NewHosts(cfg, baseDir, dryRun)
 }
 
 func main() {
