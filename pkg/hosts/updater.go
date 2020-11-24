@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ErrNonExpectedStatus error for a non expected http status code.
 var ErrNonExpectedStatus = errors.New("non-expected status returned")
 
 // Updater executes the update process of external data sources. Also handles the expected

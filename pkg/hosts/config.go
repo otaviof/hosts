@@ -22,8 +22,10 @@ const (
 )
 
 var (
+	// ErrRequiredAttribute error for a required attribute not informed.
 	ErrRequiredAttribute = errors.New("required attribute not informed")
-	ErrInvalidRegex      = errors.New("invalid regular-expresssion")
+	// ErrInvalidRegex error for a invalid regex.
+	ErrInvalidRegex = errors.New("invalid regular-expresssion")
 )
 
 // Root configuration top level object.

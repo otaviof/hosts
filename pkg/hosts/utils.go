@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ErrBaseDirNotFound error for base directory not found.
 var ErrBaseDirNotFound = errors.New("base directory not found")
 
 // SetLogLevel set the log level based on parameter.

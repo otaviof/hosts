@@ -16,6 +16,7 @@ const parseRE = `^([a-z0-9.:%]+)\s+(\w+.*?)$`
 
 var re = regexp.MustCompile(parseRE)
 
+// ErrInvalidHostEntry error for invalid `host` block in configuration.
 var ErrInvalidHostEntry = errors.New("hosts line does not match expected format")
 
 // NewHost instantiate a host line entry.
