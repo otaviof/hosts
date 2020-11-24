@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var nonExpectedStatusErr = errors.New("non-expected status returned")
+var ErrNonExpectedStatus = errors.New("non-expected status returned")
 
 // Updater executes the update process of external data sources. Also handles the expected
 // transformation of data, informed in configuration file.
@@ -31,7 +31,7 @@ func (u *Updater) Get(uri string) ([]byte, error) {
 
 	u.logger.Debugf("Returned status code '%d'", response.StatusCode)
 	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%w: %d", nonExpectedStatusErr, response.StatusCode)
+		return nil, fmt.Errorf("%w: %d", ErrNonExpectedStatus, response.StatusCode)
 	}
 
 	payload, err := ioutil.ReadAll(response.Body)

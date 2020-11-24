@@ -108,7 +108,7 @@ func (r *Render) Output(output Output) error {
 	payload := r.loopFilesContent(selectedFiles, fn)
 	logger.Debugf("File size '%d' bytes", len(payload))
 
-	logger.Infof("Writting file '%s' (%d bytes)", output.Path, len(payload))
+	logger.Infof("Writing file '%s' (%d bytes)", output.Path, len(payload))
 	if r.dryRun {
 		logger.Info("Dry-run mode, file is not written.")
 		logger.Tracef("%s", payload)

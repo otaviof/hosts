@@ -22,8 +22,8 @@ const (
 )
 
 var (
-	requireAttributeErr = errors.New("required attribute not informed")
-	invalidRegexErr     = errors.New("invalid regular-expresssion")
+	ErrRequiredAttribute = errors.New("required attribute not informed")
+	ErrInvalidRegex      = errors.New("invalid regular-expresssion")
 )
 
 // Root configuration top level object.
@@ -99,10 +99,10 @@ func (c *Config) Validate() error {
 	if len(c.Input.Sources) > 0 {
 		for i, s := range c.Input.Sources {
 			if s.File == "" {
-				return fmt.Errorf("%w: hosts.input.sources[%d].file", requireAttributeErr, i)
+				return fmt.Errorf("%w: hosts.input.sources[%d].file", ErrRequiredAttribute, i)
 			}
 			if s.URL == "" {
-				return fmt.Errorf("%w: hosts.input.sources[%d].url", requireAttributeErr, i)
+				return fmt.Errorf("%w: hosts.input.sources[%d].url", ErrRequiredAttribute, i)
 			}
 		}
 	}
@@ -110,7 +110,7 @@ func (c *Config) Validate() error {
 		for i, t := range c.Input.Transformations {
 			if t.Search == "" {
 				return fmt.Errorf("%w: hosts.input.transformations[%d].search",
-					requireAttributeErr, i)
+					ErrRequiredAttribute, i)
 			}
 			if _, err := t.CompileRE(); err != nil {
 				return fmt.Errorf("%w: hosts.input.transformations[%d].search", err, i)
@@ -126,7 +126,7 @@ func (c *Config) Validate() error {
 				return fmt.Errorf("%w: hosts.output[%d].(with|without)", err, i)
 			}
 			if o.Path == "" {
-				return fmt.Errorf("%w: hosts.output[%d].path", requireAttributeErr, i)
+				return fmt.Errorf("%w: hosts.output[%d].path", ErrRequiredAttribute, i)
 			}
 		}
 	}
