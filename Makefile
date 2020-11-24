@@ -1,7 +1,7 @@
 APP ?= hosts
 GO_COMMON_FLAGS ?= -v -mod=vendor
 GO_TEST_FLAGS ?= -cover
-OUTPUT_DIR ?= build
+OUTPUT_DIR ?= _output
 TEST_TIMEOUT ?= 1m
 RUN_ARGS ?=
 
