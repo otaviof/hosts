@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	SetLogLevel(6)
+	SetLogLevel(5)
 }
 
 func TestNewHost(t *testing.T) {

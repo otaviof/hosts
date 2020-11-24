@@ -39,7 +39,7 @@ func (f *File) Load(r io.Reader) error {
 	for scanner.Scan() {
 		h, err := NewHost(scanner.Text())
 		if err != nil {
-			log.Warnf("Skipping: '%s'", err)
+			log.Tracef("Skipping: '%s'", err)
 			continue
 		}
 		f.Content = append(f.Content, h)

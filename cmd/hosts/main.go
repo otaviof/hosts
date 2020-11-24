@@ -23,21 +23,24 @@ source-of-authority you can include and exclude parts to generate those files.
 }
 
 var (
+	// logLevel flag to hold log verbosity level.
 	logLevel int
-	baseDir  string
-	dryRun   bool
+	// baseDir flag to hold path to base directory.
+	baseDir string
+	// dryRun flag to indicate dry-run mode.
+	dryRun bool
 )
 
 func init() {
 	flags := rootCmd.PersistentFlags()
 
-	flags.IntVar(&logLevel, "log-level", int(log.InfoLevel), "configuration file path")
+	flags.IntVar(&logLevel, "log-level", int(log.InfoLevel), "log verbosity, from 0 to 6")
 	flags.StringVar(&baseDir, "base-dir", "", "configuration file path")
 	flags.BoolVar(&dryRun, "dry-run", false, "dry-run mode")
 }
 
-// newHosts instantiate the application and configuration.
-func newHosts() *hosts.Hosts {
+// newConfig returns a hosts.Config instance based on parameters informed.
+func newConfig() (*hosts.Config, error) {
 	hosts.SetLogLevel(logLevel)
 
 	if baseDir == "" {
@@ -49,14 +52,18 @@ func newHosts() *hosts.Hosts {
 	configPath := path.Join(baseDir, hosts.ConfigFile)
 	log.Debugf("Using configuration file at '%s'", configPath)
 
-	cfg, err := hosts.NewConfig(configPath)
+	return hosts.NewConfig(configPath)
+}
+
+// newHosts instantiate the application and configuration.
+func newHosts() *hosts.Hosts {
+	cfg, err := newConfig()
 	if err != nil {
 		log.Fatalf("error instantiating config: '%v'", err)
 	}
 	if err = cfg.Validate(); err != nil {
 		log.Fatalf("error validating configuration: '%v'", err)
 	}
-
 	return hosts.NewHosts(cfg, baseDir, dryRun)
 }
 
