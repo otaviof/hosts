@@ -17,8 +17,8 @@ Helps you to manage and dinamically render '/etc/hosts' file contents, based in 
 You can also fetch hosts definitions from the internet, parse, clean-up, and let it be part of your
 hosts definitions.
 
-You can generate multiple output files, and specify dnsmasq format as well. Therefore, from a single
-source-of-authority you can include and exclude parts to generate those files.
+You can generate multiple output files, and specify the dnsmasq format as well. Therefore, from a
+single source-of-authority you can include and exclude parts to generate those files.
 `,
 }
 
