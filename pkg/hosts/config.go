@@ -26,6 +26,8 @@ var (
 	ErrRequiredAttribute = errors.New("required attribute not informed")
 	// ErrInvalidRegex error for a invalid regex.
 	ErrInvalidRegex = errors.New("invalid regular-expresssion")
+	// ErrEmptySearch when there's no search pattern.
+	ErrEmptySearch = errors.New("empty search pattern")
 )
 
 // Root configuration top level object.
@@ -61,7 +63,7 @@ type Transformation struct {
 // CompileRE compiles the regular expression in search attribute.
 func (t *Transformation) CompileRE() (*regexp.Regexp, error) {
 	if t.Search == "" {
-		return nil, nil
+		return nil, fmt.Errorf("%w: %q", ErrEmptySearch, t.Search)
 	}
 	return regexp.Compile(t.Search)
 }

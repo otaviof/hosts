@@ -28,7 +28,7 @@ func init() {
 }
 
 // runApplyCmd instantiate Hosts and run Apply routine.
-func runApplyCmd(cmd *cobra.Command, args []string) {
+func runApplyCmd(_ *cobra.Command, _ []string) {
 	hosts := newHosts()
 	if err := hosts.Load(); err != nil {
 		log.Fatalf("[ERROR] %s", err)

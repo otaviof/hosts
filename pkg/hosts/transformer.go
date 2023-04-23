@@ -3,6 +3,7 @@ package hosts
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"regexp"
 
@@ -58,10 +59,10 @@ func (t *Transformer) Transform(payload []byte) ([]byte, error) {
 // internal representation. A shared map holds compiled regular expression and the replace string.
 func (t *Transformer) compileREs() error {
 	for _, transformation := range t.transformations {
-		re, err := transformation.CompileRE()
 		t.logger.Debugf("Compiling regular-expression for search '%s', replace '%s'",
 			transformation.Search, transformation.Replace)
-		if err != nil {
+		re, err := transformation.CompileRE()
+		if err != nil && !errors.Is(ErrEmptySearch, err) {
 			return err
 		}
 		t.regularExpressions[re] = transformation.Replace

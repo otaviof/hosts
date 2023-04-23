@@ -30,7 +30,7 @@ func init() {
 
 // runConfigCmd instantiate a new configuration, which validates the base directory and existence of
 // "hosts.yaml", and then excute the configuration validation.
-func runConfigCmd(cmd *cobra.Command, args []string) {
+func runConfigCmd(_ *cobra.Command, _ []string) {
 	cfg, err := newConfig()
 	if err != nil {
 		log.Fatalf("[ERROR] %s", err)

@@ -24,7 +24,7 @@ func init() {
 }
 
 // runUpdateCmd instantiate Hosts, and run update routine.
-func runUpdateCmd(cmd *cobra.Command, args []string) {
+func runUpdateCmd(_ *cobra.Command, _ []string) {
 	hosts := newHosts()
 	if err := hosts.Update(); err != nil {
 		log.Fatalf("[ERROR] %s", err)

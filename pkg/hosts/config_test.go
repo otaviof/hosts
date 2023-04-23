@@ -10,6 +10,7 @@ import (
 const testBaseDir = "../../test/hosts-dir"
 
 func newConfig(t *testing.T) *Config {
+	t.Helper()
 	cfg, err := NewConfig(path.Join(testBaseDir, "hosts.yaml"))
 	require.NoError(t, err, "should not error on parsing test configuration")
 	return cfg
