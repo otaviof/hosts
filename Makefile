@@ -1,21 +1,19 @@
 APP ?= hosts
-GO_COMMON_FLAGS ?= -v -mod=vendor
-GO_TEST_FLAGS ?= -cover
 OUTPUT_DIR ?= _output
-TEST_TIMEOUT ?= 1m
-RUN_ARGS ?=
+BIN ?= $(OUTPUT_DIR)/$(APP)
 
-default: build
+CMD ?= ./cmd/...
 
-vendor:
-	go mod vendor -v
+GOFLAGS ?= -v -mod=vendor
+GOFLAGS_TEST ?= -v -race -cover -timeout=1m
 
-.PHONY: $(OUTPUT_DIR)/$(APP)
-$(OUTPUT_DIR)/$(APP):
-	@mkdir $(OUTPUT_DIR) > /dev/null 2>&1 || true
-	go build $(GO_COMMON_FLAGS) -o $(OUTPUT_DIR)/$(APP) cmd/$(APP)/*
+ARGS ?=
 
-build: vendor $(OUTPUT_DIR)/$(APP)
+default: $(BIN)
+
+.PHONY: $(BIN)
+$(BIN):
+	go build -o $(BIN) $(CMD)
 
 clean:
 	rm -rf "$(OUTPUT_DIR)" || true
@@ -23,11 +21,11 @@ clean:
 test: test-unit
 
 test-unit:
-	go test $(GO_COMMON_FLAGS) $(GO_TEST_FLAGS) -timeout=$(TEST_TIMEOUT) ./...
+	go test $(GOFLAGS_TEST) ./...
 
 .PHONY: install
-install: build
-	install -m +x $(OUTPUT_DIR)/$(APP) $(GOPATH)/bin/$(APP)
+install:
+	go install $(CMD)
 
 run:
-	go run $(GO_COMMON_FLAGS) cmd/$(APP)/* $(RUN_ARGS)
+	go run $(CMD) $(ARGS)
