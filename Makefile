@@ -1,5 +1,5 @@
 APP ?= hosts
-OUTPUT_DIR ?= _output
+OUTPUT_DIR ?= bin
 BIN ?= $(OUTPUT_DIR)/$(APP)
 
 CMD ?= ./cmd/...

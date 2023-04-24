@@ -1,5 +1,5 @@
-_output/
-.env
-.vscode
-test/hosts-dir/99-blocks.host
-vendor/
+/bin/
+/.env
+/.vscode
+/test/hosts-dir/99-*
+/vendor/
