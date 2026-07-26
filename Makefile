@@ -1,33 +1,66 @@
-APP ?= hosts
-GO_COMMON_FLAGS ?= -v -mod=vendor
-GO_TEST_FLAGS ?= -cover
-OUTPUT_DIR ?= _output
-TEST_TIMEOUT ?= 1m
-RUN_ARGS ?=
+APP = hosts
+OUTPUT_DIR ?= bin
+VERSION ?= $(shell cat ./version)
+
+BIN ?= $(OUTPUT_DIR)/$(APP)
+CMD ?= ./cmd/$(APP)/...
+PKG ?= ./pkg/$(APP)/...
+
+GOFLAGS ?= -trimpath
+LDFLAGS ?= -s -w
+
+GOFLAGS_TEST ?= \
+	-v  \
+	-failfast \
+	-race \
+	-cover \
+	-coverprofile=coverage.txt \
+	-covermode=atomic
+
+LOWER_OSTYPE ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
+CPUTYPE ?= $(shell uname -m)
+INSTALL_DIR ?= /usr/local/bin
+
+ARGS ?=
+
+.EXPORT_ALL_VARIABLES:
 
 default: build
 
 vendor:
 	go mod vendor -v
 
-.PHONY: $(OUTPUT_DIR)/$(APP)
-$(OUTPUT_DIR)/$(APP):
-	@mkdir $(OUTPUT_DIR) > /dev/null 2>&1 || true
-	go build $(GO_COMMON_FLAGS) -o $(OUTPUT_DIR)/$(APP) cmd/$(APP)/*
+.PHONY: $(BIN)
+$(BIN):
+	CGO_ENABLED=0 go build -ldflags="$(LDFLAGS)" $(GOFLAGS) -o $(BIN) $(CMD)
 
-build: vendor $(OUTPUT_DIR)/$(APP)
+build: $(BIN)
 
+.PHONY: run
+run:
+	go run $(CMD) $(ARGS)
+
+install: build
+	install -m 0755 $(BIN) $(INSTALL_DIR)/$(APP)
+
+.PHONY: clean
 clean:
-	rm -rf "$(OUTPUT_DIR)" || true
+	rm -rf $(OUTPUT_DIR) >/dev/null
+
+.PHONY: lint
+lint:
+	golangci-lint run ./...
 
 test: test-unit
 
+.PHONY: test-unit
 test-unit:
-	go test $(GO_COMMON_FLAGS) $(GO_TEST_FLAGS) -timeout=$(TEST_TIMEOUT) ./...
+	go test $(GOFLAGS_TEST) $(CMD) $(PKG)
 
-.PHONY: install
-install: build
-	install -m +x $(OUTPUT_DIR)/$(APP) $(GOPATH)/bin/$(APP)
+snapshot:
+	goreleaser --clean --snapshot --skip=publish
 
-run:
-	go run $(GO_COMMON_FLAGS) cmd/$(APP)/* $(RUN_ARGS)
+release:
+	git tag $(VERSION)
+	git push --tags origin $(VERSION)
+	goreleaser --clean

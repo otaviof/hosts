@@ -1,9 +1,0 @@
----
-language: go
-go:
-  - 1.14.x
-installL: true
-script:
-  - make
-  - make test
-  - make install

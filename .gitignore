@@ -1,5 +1,6 @@
-_output/
+bin/
 .env
 .vscode
 test/hosts-dir/99-blocks.host
 vendor/
+coverage*
