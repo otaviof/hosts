@@ -7,7 +7,7 @@ dist: ./bin/dist
 builds:
   - id: hosts
     binary: hosts
-    main: cmd/hosts/main.go
+    main: ./cmd/hosts/
     env:
       - CGO_ENABLED=0
     flags:

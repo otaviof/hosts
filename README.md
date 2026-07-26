@@ -5,8 +5,8 @@
     <a href="https://pkg.go.dev/github.com/otaviof/hosts">
         <img alt="GoDoc Reference" src="https://godoc.org/github.com/otaviof/hosts/pkg/hosts?status.svg">
     </a>
-    <a alt="CI Status" href="https://travis-ci.com/otaviof/hosts">
-        <img alt="CI Status" src="https://travis-ci.com/otaviof/hosts.svg?branch=master">
+    <a alt="CI Status" href="https://github.com/otaviof/hosts/actions/workflows/ci.yaml">
+        <img alt="CI Status" src="https://github.com/otaviof/hosts/actions/workflows/ci.yaml/badge.svg">
     </a>
 </p>
 
@@ -47,7 +47,7 @@ For the command line parameters, please use `hosts --help` and inspect the sub-c
 `apply` as well.
 
 The daily basis usage would be to edit files under `~/.hosts` (as the
-[example here](https://github.com/otaviof/hosts/tree/master/test/hosts-dir)), and run:
+[example here](https://github.com/otaviof/hosts/tree/main/test/hosts-dir)), and run:
 
 ```sh
 # updating external data sources
@@ -115,7 +115,7 @@ possible errors early on.
 ### Host Files
 
 This application will look for `.host` files in the base directory location. You can find example
-of those files in [`test/hosts-dir`](https://github.com/otaviof/hosts/tree/master/test/hosts-dir),
+of those files in [`test/hosts-dir`](https://github.com/otaviof/hosts/tree/main/test/hosts-dir),
 the formatting is the same [than `/etc/hosts` file](https://man7.org/linux/man-pages/man5/hosts.5.html).
 
 For instance:
@@ -146,7 +146,7 @@ It's a common use-case to map malicious or advertising related addresses in `/et
 
 Online communities like for instance [SomeOneWhoCares.org](https://someonewhocares.org) and
 [uBlock Assets](https://github.com/uBlockOrigin/uAssets), are providing a up-to-date list of
-[hosts](https://github.com/uBlockOrigin/uAssets/tree/master/thirdparties) which users can adopt,
+[hosts](https://github.com/uBlockOrigin/uAssets/tree/main/thirdparties) which users can adopt,
 although, in many cases you may need modifications, and may want to skip certain entries as well.
 
 Therefore, `hosts` provide a way to load the external resource and apply regular expression based
